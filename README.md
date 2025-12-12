@@ -1,7 +1,15 @@
-echo "# beansdreams-portal" >> README.md
-git init
-git add README.md
-git commit -m "first commit"
-git branch -M main
-git remote add origin https://github.com/RebeccaBean/beansdreams-portal.git
-git push -u origin main
+
+## 🛠️ Tech Stack
+- **Frontend**: React (or your chosen framework)
+- **Backend**: Node.js/Express (or Django/Flask)
+- **Database**: PostgreSQL / MySQL / MongoDB
+- **Deployment**: GitHub Pages, Netlify, Vercel (frontend) + Render, Railway, Heroku (backend)
+
+---
+
+## ⚙️ Setup Instructions
+
+### 1. Clone the repo
+```bash
+git clone https://github.com/yourusername/beansdreams-portal.git
+cd beansdreams-portal
