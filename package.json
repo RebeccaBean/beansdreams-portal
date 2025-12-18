@@ -1,0 +1,32 @@
+{
+  "name": "beansdreams-portal",
+  "version": "1.0.0",
+  "description": "- **Frontend**: React (or your chosen framework)\r - **Backend**: Node.js/Express (or Django/Flask)\r - **Database**: PostgreSQL / MySQL / MongoDB\r - **Deployment**: GitHub Pages, Netlify, Vercel (frontend) + Render, Railway, Heroku (backend)",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RebeccaBean/beansdreams-portal.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/RebeccaBean/beansdreams-portal/issues"
+  },
+  "homepage": "https://github.com/RebeccaBean/beansdreams-portal#readme",
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "nodemailer": "^7.0.11",
+    "pg": "^8.16.3"
+  }
+}
