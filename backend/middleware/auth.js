@@ -1,25 +1,63 @@
 // backend/middleware/auth.js
-const jwt = require('jsonwebtoken');
+import jwt from "jsonwebtoken";
+import db from "../db.js";
 
-function authenticateToken(req, res, next) {
-  const authHeader = req.headers['authorization'];
-  if (!authHeader) return res.status(401).send('No token provided');
-
-  const token = authHeader.split(' ')[1];
+/**
+ * ✅ Verify JWT and attach user to req.user
+ */
+export async function requireAuth(req, res, next) {
   try {
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    const token = authHeader.split(" ")[1];
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded; // attach user info to request
+
+    // Fetch user from DB
+    const user = await db.students.findByPk(decoded.id);
+    if (!user) {
+      return res.status(401).json({ error: "User not found" });
+    }
+
+    req.user = user; // ✅ attach user to request
     next();
+
   } catch (err) {
-    return res.status(403).send('Invalid token');
+    console.error("Auth error:", err);
+    res.status(401).json({ error: "Invalid or expired token" });
   }
 }
 
-function authorizeRole(role) {
-  return (req, res, next) => {
-    if (req.user.role !== role) return res.status(403).send('Forbidden');
-    next();
-  };
+/**
+ * ✅ Allow only admins
+ */
+export function requireAdmin(req, res, next) {
+  if (!req.user || req.user.role !== "admin") {
+    return res.status(403).json({ error: "Admin access required" });
+  }
+  next();
 }
 
-module.exports = { authenticateToken, authorizeRole };
+/**
+ * ✅ Allow only teachers
+ */
+export function requireTeacher(req, res, next) {
+  if (!req.user || req.user.role !== "teacher") {
+    return res.status(403).json({ error: "Teacher access required" });
+  }
+  next();
+}
+
+/**
+ * ✅ Allow teachers OR admins
+ * Useful for class management, grading, dashboards, etc.
+ */
+export function requireTeacherOrAdmin(req, res, next) {
+  if (!req.user || !["teacher", "admin"].includes(req.user.role)) {
+    return res.status(403).json({ error: "Teacher or admin access required" });
+  }
+  next();
+}

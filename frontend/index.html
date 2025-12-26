@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Bean's Dreams Student Portal — Authentication</title>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Alex+Brush&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="auth.css">
+</head>
+
+<body>
+  <h2>Bean's Dreams Student Portal</h2>
+
+  <!-- Navigation -->
+  <nav>
+    <button onclick="showForm('signin')">Sign In</button>
+    <button onclick="showForm('signup')">Sign Up</button>
+    <button onclick="showForm('forgot')">Forgot Password</button>
+    <button onclick="showForm('reset')">Reset Password</button>
+  </nav>
+
+  <!-- Sign In -->
+  <div id="signin" class="form-container active">
+    <form id="signinForm">
+      <input type="email" id="signinEmail" placeholder="Email" required>
+      <input type="password" id="signinPassword" placeholder="Password" required>
+      <button type="submit">Sign In</button>
+    </form>
+    <p id="signinMessage"></p>
+  </div>
+
+  <!-- Sign Up -->
+  <div id="signup" class="form-container">
+    <form id="signupForm">
+      <input type="text" id="signupName" placeholder="Name" required>
+      <input type="email" id="signupEmail" placeholder="Email" required>
+      <input type="password" id="signupPassword" placeholder="Password" required>
+      <button type="submit">Sign Up</button>
+    </form>
+    <p id="signupMessage"></p>
+  </div>
+
+  <!-- Forgot Password -->
+  <div id="forgot" class="form-container">
+    <form id="forgotForm">
+      <input type="email" id="forgotEmail" placeholder="Email" required>
+      <button type="submit">Send Reset Link</button>
+    </form>
+    <p id="forgotMessage"></p>
+  </div>
+
+  <!-- Reset Password -->
+  <div id="reset" class="form-container">
+    <form id="resetForm">
+      <input type="text" id="resetToken" placeholder="Reset Token" required>
+      <input type="password" id="newPassword" placeholder="New Password" required>
+      <button type="submit">Reset Password</button>
+    </form>
+    <p id="resetMessage"></p>
+  </div>
+
+  <!-- JS -->
+  <script src="auth.js"></script>
+</body>
+</html>

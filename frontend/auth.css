@@ -1,0 +1,84 @@
+/* Brand Colors */
+:root {
+  --brand-orange: #FD8100;
+  --brand-blue: #004AAA;
+  --brand-red: #b50202;
+  --brand-yellow: #FFE89C;
+  --brand-lightorange: #FFD699;
+}
+
+/* Global */
+body {
+  font-family: 'Open Sans', sans-serif;
+  background: linear-gradient(135deg, var(--brand-yellow), var(--brand-lightorange), var(--brand-orange));
+  margin: 0;
+  padding: 20px;
+  color: #333;
+  text-align: center;
+  min-height: 100vh;
+}
+
+/* Heading */
+h2 {
+  font-family: 'Alex Brush', cursive;
+  font-size: 3rem;
+  color: var(--brand-blue);
+}
+
+/* Navigation */
+nav button {
+  margin: 5px;
+  padding: 10px 16px;
+  background: var(--brand-orange);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+nav button:hover {
+  background: var(--brand-red);
+}
+
+/* Form Containers */
+.form-container {
+  display: none;
+  margin: 20px auto;
+  padding: 20px;
+  background: var(--brand-yellow);
+  border-radius: 12px;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.form-container.active {
+  display: block;
+}
+
+/* Inputs */
+input {
+  width: 100%;
+  padding: 10px;
+  margin: 8px 0;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+/* Submit Buttons */
+button[type="submit"] {
+  width: 100%;
+  padding: 12px;
+  background: var(--brand-blue);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+button[type="submit"]:hover {
+  background: #003580;
+}
+
