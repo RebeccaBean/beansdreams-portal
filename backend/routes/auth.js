@@ -1,91 +1,158 @@
 // backend/routes/auth.js
-import express from 'express';
-import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
-import crypto from 'crypto';
-import nodemailer from 'nodemailer';
-import { db } from '../db.js'; // import Sequelize models
-import { Op } from 'sequelize'; // ✅ import Op directly
+import express from "express";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import crypto from "crypto";
+import { Op } from "sequelize";
+import db from "../db.js";
+import { sendEmail } from "../utils/mailer.js";
+import {
+  welcomeEmail,
+  resetPasswordEmail
+} from "../utils/emailTemplates.js";
+
+import { syncPendingForStudent } from "../utils/syncPending.js";
 
 const router = express.Router();
 
-// SIGN UP
-router.post('/signup', async (req, res) => {
-  const { name, email, password, role } = req.body;
+/**
+ * ✅ SIGN UP — All new users become "student"
+ */
+router.post("/signup", async (req, res) => {
+  const { name, email, password } = req.body;
+
   try {
+    if (!name || !email || !password) {
+      return res.status(400).json({
+        error: "Name, email, and password are required"
+      });
+    }
+
+    const existing = await db.students.findOne({ where: { email } });
+    if (existing) {
+      return res.status(400).json({ error: "Email already registered" });
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
+
+    // ✅ Create student with forced role = student
     const student = await db.students.create({
       name,
       email,
-      password: hashedPassword,   // make sure Student model has a password field
-      role: role || 'student'
+      password: hashedPassword,
+      role: "student"
     });
 
-    // ✅ Send welcome email
-    await sendEmail(email, 'Welcome to the Portal', `
-      <h2>Welcome, ${name}!</h2>
-      <p>We’re excited to have you on board.</p>
-    `);
+    // ✅ Sync ALL pending data (credits, downloads, subs, orders)
+    const synced = await syncPendingForStudent(student);
 
-    res.json({ id: student.id, email: student.email, role: student.role });
+    // ✅ Send welcome email
+    const html = welcomeEmail({
+      brand: "Student Portal",
+      firstName: student.name.split(" ")[0],
+      email: student.email,
+      role: student.role,
+      dashboardUrl: "https://yourdomain.com/dashboard",
+      supportEmail: "support@yourdomain.com",
+      logoUrl: "https://yourcdn.com/logo.png",
+      websiteUrl: "https://yourdomain.com"
+    });
+
+    await sendEmail(student.email, "Welcome to Student Portal", html);
+
+    res.json({
+      id: student.id,
+      email: student.email,
+      role: student.role,
+      syncedPending: synced
+    });
+
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Error signing up' });
+    console.error("Signup error:", err);
+    res.status(500).json({ error: "Error signing up" });
   }
 });
 
-// SIGN IN
-router.post('/signin', async (req, res) => {
+/**
+ * ✅ SIGN IN
+ */
+router.post("/signin", async (req, res) => {
   const { email, password } = req.body;
+
   try {
     const student = await db.students.findOne({ where: { email } });
-    if (!student) return res.status(400).json({ error: 'User not found' });
+    if (!student) {
+      return res.status(400).json({ error: "User not found" });
+    }
 
     const match = await bcrypt.compare(password, student.password);
-    if (!match) return res.status(400).json({ error: 'Invalid credentials' });
+    if (!match) {
+      return res.status(400).json({ error: "Invalid credentials" });
+    }
+
+    // ✅ Sync ALL pending data on login too
+    const synced = await syncPendingForStudent(student);
 
     const token = jwt.sign(
       { id: student.id, role: student.role },
       process.env.JWT_SECRET,
-      { expiresIn: '1h' }
+      { expiresIn: "1h" }
     );
-    res.json({ token });
+
+    res.json({ token, syncedPending: synced });
+
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Error signing in' });
+    console.error("Signin error:", err);
+    res.status(500).json({ error: "Error signing in" });
   }
 });
 
-// FORGOT PASSWORD
-router.post('/forgot-password', async (req, res) => {
+/**
+ * ✅ FORGOT PASSWORD — Sends reset email
+ */
+router.post("/forgot-password", async (req, res) => {
   const { email } = req.body;
+
   try {
-    const token = crypto.randomBytes(32).toString('hex');
-    const expiry = new Date(Date.now() + 3600000); // 1 hour
     const student = await db.students.findOne({ where: { email } });
-    if (!student) return res.status(400).json({ error: 'User not found' });
+    if (!student) {
+      return res.status(400).json({ error: "User not found" });
+    }
+
+    const token = crypto.randomBytes(32).toString("hex");
+    const expiry = new Date(Date.now() + 3600000); // 1 hour
 
     student.reset_token = token;
     student.reset_token_expiry = expiry;
     await student.save();
 
-    // ✅ Send reset email
-    const resetLink = `http://localhost:5500/auth.html?token=${token}`;
-    await sendEmail(email, 'Password Reset', `
-      <p>Click here to reset your password:</p>
-      <a href="${resetLink}">${resetLink}</a>
-    `);
+    const resetLink = `https://yourdomain.com/reset-password?token=${token}`;
 
-    res.json({ message: 'Password reset link sent to your email' });
+    const html = resetPasswordEmail({
+      brand: "Student Portal",
+      firstName: student.name.split(" ")[0],
+      resetLink,
+      supportEmail: "support@yourdomain.com",
+      logoUrl: "https://yourcdn.com/logo.png",
+      websiteUrl: "https://yourdomain.com"
+    });
+
+    await sendEmail(email, "Reset your Student Portal password", html);
+
+    res.json({ message: "Password reset email sent" });
+
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Error generating reset link' });
+    console.error("Forgot password error:", err);
+    res.status(500).json({ error: "Error generating reset link" });
   }
 });
 
-// RESET PASSWORD
-router.post('/reset-password', async (req, res) => {
+/**
+ * ✅ RESET PASSWORD
+ */
+router.post("/reset-password", async (req, res) => {
   const { token, newPassword } = req.body;
+
   try {
     const student = await db.students.findOne({
       where: {
@@ -93,37 +160,24 @@ router.post('/reset-password', async (req, res) => {
         reset_token_expiry: { [Op.gt]: new Date() }
       }
     });
-    if (!student) return res.status(400).json({ error: 'Invalid or expired token' });
+
+    if (!student) {
+      return res.status(400).json({ error: "Invalid or expired token" });
+    }
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
+
     student.password = hashedPassword;
     student.reset_token = null;
     student.reset_token_expiry = null;
     await student.save();
 
-    res.json({ message: 'Password updated successfully' });
+    res.json({ message: "Password updated successfully" });
+
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Error resetting password' });
+    console.error("Reset password error:", err);
+    res.status(500).json({ error: "Error resetting password" });
   }
 });
-
-// ✅ Helper: Nodemailer setup
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.EMAIL_USER, // Gmail address
-    pass: process.env.EMAIL_PASS  // Gmail App Password
-  }
-});
-
-async function sendEmail(to, subject, html) {
-  await transporter.sendMail({
-    from: process.env.EMAIL_USER,
-    to,
-    subject,
-    html
-  });
-}
 
 export default router;

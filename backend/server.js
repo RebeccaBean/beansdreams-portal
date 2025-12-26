@@ -3,8 +3,12 @@ const express = require("express");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
 const authRoutes = require("./routes/auth");
+const orderRoutes = require("./routes/orders");
 
 const app = express();
+
+import creditsRoutes from "./routes/credits.js";
+app.use("/dashboard/credits", creditsRoutes);
 
 // Middleware
 app.use(cors());
@@ -36,8 +40,9 @@ function authorizeRoles(...roles) {
   };
 }
 
-// Mount auth routes
+// Mount routes
 app.use("/auth", authRoutes);
+app.use("/orders", orderRoutes);
 
 // Example protected route
 app.get("/admin", authenticate, authorizeRoles("admin"), (req, res) => {
@@ -49,3 +54,4 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Portal backend running on http://localhost:${PORT}`);
 });
+
