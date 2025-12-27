@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Buy Credits – Bean's Dreams</title>
+  <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+
+  <div class="buy-credits-container">
+
+    <h1>Buy More Credits</h1>
+    <p class="intro-text">
+      Credits let you book lessons, healing sessions, coaching, and more.  
+      Choose the option that fits your journey.
+    </p>
+
+    <!-- Credit Types -->
+    <section class="card">
+      <h2>What Are Credits?</h2>
+      <ul class="credit-explainer">
+        <li>💃 <strong>Dance Credits</strong> — used for dance lessons</li>
+        <li>🎤 <strong>Vocal Credits</strong> — used for singing lessons</li>
+        <li>🎸 <strong>Guitar Credits</strong> — used for guitar lessons</li>
+        <li>⭐ <strong>Any Credits</strong> — can be used for any lesson type</li>
+        <li>✨ <strong>Healing Credits</strong> — used for healing sessions</li>
+        <li>🎧 <strong>Coaching Credits</strong> — used for coaching sessions</li>
+      </ul>
+    </section>
+
+    <!-- Bundles -->
+    <section class="card">
+      <h2>Credit Bundles</h2>
+      <div class="bundle-grid">
+
+        <div class="bundle-card">
+          <h3>Starter Pack</h3>
+          <p>4 Any Credits</p>
+          <p class="price">$49</p>
+          <button class="btn buy-btn" data-bundle="starter">Buy Now</button>
+        </div>
+
+        <div class="bundle-card">
+          <h3>Growth Pack</h3>
+          <p>10 Any Credits</p>
+          <p class="price">$99</p>
+          <button class="btn buy-btn" data-bundle="growth">Buy Now</button>
+        </div>
+
+        <div class="bundle-card">
+          <h3>Master Pack</h3>
+          <p>20 Any Credits</p>
+          <p class="price">$179</p>
+          <button class="btn buy-btn" data-bundle="master">Buy Now</button>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Subscriptions -->
+    <section class="card">
+      <h2>Subscriptions</h2>
+      <p>Subscriptions renew monthly and include bonus credits.</p>
+
+      <div class="bundle-grid">
+
+        <div class="bundle-card">
+          <h3>ClassPass Basic</h3>
+          <p>4 Any Credits / month</p>
+          <p class="price">$39/mo</p>
+          <button class="btn buy-btn" data-sub="basic">Subscribe</button>
+        </div>
+
+        <div class="bundle-card">
+          <h3>ClassPass Plus</h3>
+          <p>8 Any Credits / month</p>
+          <p class="price">$69/mo</p>
+          <button class="btn buy-btn" data-sub="plus">Subscribe</button>
+        </div>
+
+      </div>
+    </section>
+
+    <button class="btn btn-secondary" onclick="window.location.href='/dashboard.html'">
+      Back to Dashboard
+    </button>
+
+  </div>
+
+  <script src="buy-credits.js"></script>
+</body>
+</html>

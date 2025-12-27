@@ -404,3 +404,6 @@ document.getElementById("logoutBtn").addEventListener("click", () => {
    ✅ INIT
 ============================================================ */
 document.addEventListener("DOMContentLoaded", loadCurrentUser);
+document.getElementById("buyCreditsBtn").addEventListener("click", () => {
+  window.location.href = "/buy-credits.html";
+});
