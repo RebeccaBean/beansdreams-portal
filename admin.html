@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Panel</title>
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+
+<div id="login-screen" class="screen">
+  <h1>Admin Login</h1>
+  <div class="card">
+    <input id="email" type="email" placeholder="Email">
+    <input id="password" type="password" placeholder="Password">
+    <button id="login-btn">Login</button>
+    <p id="login-error" class="error"></p>
+  </div>
+</div>
+
+<div id="admin-screen" class="screen hidden">
+  <header>
+    <h1>Admin Dashboard</h1>
+    <button id="logout-btn">Logout</button>
+  </header>
+
+  <nav>
+    <button data-section="dashboard">Dashboard</button>
+    <button data-section="students">Students</button>
+  </nav>
+
+  <main>
+    <!-- Dashboard -->
+    <section id="dashboard-section" class="section">
+      <h2>Dashboard</h2>
+      <div class="stats">
+        <div class="stat-card">
+          <h3>Students</h3>
+          <p id="stat-students">0</p>
+        </div>
+        <div class="stat-card">
+          <h3>Orders</h3>
+          <p id="stat-orders">0</p>
+        </div>
+        <div class="stat-card">
+          <h3>Subscriptions</h3>
+          <p id="stat-subscriptions">0</p>
+        </div>
+        <div class="stat-card">
+          <h3>Pending</h3>
+          <p id="stat-pending">0</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Students -->
+    <section id="students-section" class="section hidden">
+      <h2>Students</h2>
+
+      <div class="search-bar">
+        <input id="student-search" type="text" placeholder="Search students...">
+        <button id="search-btn">Search</button>
+      </div>
+
+      <table id="students-table">
+        <thead>
+          <tr>
+            <th>Name</th><th>Email</th><th>Role</th><th></th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+
+      <div id="student-detail" class="hidden">
+        <h3 id="student-name"></h3>
+        <p id="student-email"></p>
+
+        <h4>Add Credits</h4>
+        <input id="credit-amount" type="number" placeholder="Amount">
+        <button id="add-credit-btn">Add</button>
+
+        <h4>Add Note</h4>
+        <textarea id="note-text"></textarea>
+        <button id="add-note-btn">Save Note</button>
+
+        <h4>Assign Download</h4>
+        <input id="download-product" placeholder="Product ID">
+        <button id="assign-download-btn">Assign</button>
+
+        <h4>Assign Custom File</h4>
+        <input id="custom-label" placeholder="Label">
+        <input id="custom-file-id" placeholder="File ID">
+        <button id="assign-custom-btn">Assign</button>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script src="admin.js"></script>
+</body>
+</html>
