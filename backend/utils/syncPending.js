@@ -1,8 +1,8 @@
 // backend/utils/syncPending.js
-import db from "../db.js";
+const db = require("../db.js");
 
 /**
- * ✅ Sync ALL pending data for a student:
+ * Sync ALL pending data for a student:
  * - Pending credits
  * - Pending downloads
  * - Pending subscriptions
@@ -10,7 +10,7 @@ import db from "../db.js";
  *
  * Returns an object describing what was synced.
  */
-export async function syncPendingForStudent(student) {
+async function syncPendingForStudent(student) {
   if (!student) return { credits: 0, downloads: 0, subscriptions: 0, orders: 0 };
 
   const uid = student.id;
@@ -24,7 +24,7 @@ export async function syncPendingForStudent(student) {
   };
 
   /* -----------------------------
-     ✅ 1. Sync Pending Credits
+     1. Sync Pending Credits
   ----------------------------- */
   const pendingCredits = await db.pendingCredits.findAll({ where: { email } });
 
@@ -45,7 +45,7 @@ export async function syncPendingForStudent(student) {
   }
 
   /* -----------------------------
-     ✅ 2. Sync Pending Downloads
+     2. Sync Pending Downloads
   ----------------------------- */
   const pendingDownloads = await db.pendingDownloads.findAll({ where: { email } });
 
@@ -62,7 +62,7 @@ export async function syncPendingForStudent(student) {
   }
 
   /* -----------------------------
-     ✅ 3. Sync Pending Subscriptions
+     3. Sync Pending Subscriptions
   ----------------------------- */
   const pendingSubs = await db.pendingSubscriptions.findAll({ where: { email } });
 
@@ -81,7 +81,7 @@ export async function syncPendingForStudent(student) {
   }
 
   /* -----------------------------
-     ✅ 4. Sync Pending Orders
+     4. Sync Pending Orders
   ----------------------------- */
   const pendingOrders = await db.pendingOrders.findAll({ where: { email } });
 
@@ -116,3 +116,7 @@ export async function syncPendingForStudent(student) {
 
   return synced;
 }
+
+module.exports = {
+  syncPendingForStudent
+};

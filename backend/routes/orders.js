@@ -1,12 +1,12 @@
 // backend/routes/orders.js
-import express from "express";
-import db from "../db.js";
-import { syncPendingForStudent } from "../utils/syncPending.js";
+const express = require("express");
+const db = require("../db");
+const { syncPendingForStudent } = require("../utils/syncPending");
 
 const router = express.Router();
 
 /**
- * ✅ GET /students/:uid/orders
+ * GET /students/:uid/orders
  * Returns all orders for a student.
  * Automatically syncs pending orders first.
  */
@@ -19,7 +19,7 @@ router.get("/students/:uid/orders", async (req, res) => {
       return res.status(404).json({ error: "Student not found" });
     }
 
-    // ✅ Sync ALL pending data before returning orders
+    // Sync ALL pending data before returning orders
     await syncPendingForStudent(student);
 
     const orders = await db.orders.findAll({
@@ -36,7 +36,7 @@ router.get("/students/:uid/orders", async (req, res) => {
 });
 
 /**
- * ✅ POST /orders/create
+ * POST /orders/create
  * Called by the PayPal server after capture.
  * Creates an order + order items.
  * If student does NOT exist → store as pending order.
@@ -49,7 +49,7 @@ router.post("/orders/create", async (req, res) => {
       return res.status(400).json({ error: "Missing email or cart" });
     }
 
-    // ✅ If student does NOT exist → store as pending order
+    // If student does NOT exist → store as pending order
     const student = uid ? await db.students.findByPk(uid) : null;
 
     if (!student) {
@@ -70,7 +70,7 @@ router.post("/orders/create", async (req, res) => {
       });
     }
 
-    // ✅ Student exists → sync pending + create order
+    // Student exists → sync pending + create order
     await syncPendingForStudent(student);
 
     const order = await db.orders.create({
@@ -82,7 +82,7 @@ router.post("/orders/create", async (req, res) => {
       createdAt: new Date().toISOString()
     });
 
-    // ✅ Create order items
+    // Create order items
     for (const item of cart) {
       await db.orderItems.create({
         orderId: order.id,
@@ -102,7 +102,7 @@ router.post("/orders/create", async (req, res) => {
 });
 
 /**
- * ✅ POST /orders/:orderId/printify
+ * POST /orders/:orderId/printify
  * Stores Printify order data after PayPal server creates a merch order.
  */
 router.post("/orders/:orderId/printify", async (req, res) => {
@@ -125,4 +125,4 @@ router.post("/orders/:orderId/printify", async (req, res) => {
   }
 });
 
-export default router;
+module.exports = router;

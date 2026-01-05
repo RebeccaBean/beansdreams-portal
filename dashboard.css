@@ -176,7 +176,7 @@ body {
 }
 
 .card h2 {
-  font-family: 'Open Sans', sans-serif;
+   font-family: 'Open Sans', sans-serif;
   color: var(--brand-blue);
   font-size: 1.8rem;
   margin-top: 0;
@@ -222,6 +222,40 @@ body {
   color: var(--brand-blue);
   margin-bottom: 10px;
 }
+.credit-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.credit-icon {
+  font-size: 22px;
+}
+/* Hamburger button */
+.hamburger-btn {
+  font-size: 1.8rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  margin-right: 1rem;
+  display: none; /* hidden on desktop */
+}
+
+/* Show hamburger on mobile */
+@media (max-width: 900px) {
+  .hamburger-btn {
+    display: block;
+  }
+
+  .sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+}
 
 /* Uploads */
 .upload-form {
@@ -252,6 +286,286 @@ body {
   border-radius: 6px;
   border: 1px solid #ccc;
 }
+#subscriptionsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.subscription-item {
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
+  background: #fafafa;
+}
+
+.subscription-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 0.5rem;
+}
+
+.subscription-plan {
+  font-weight: 600;
+}
+
+.subscription-status {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.subscription-status.active {
+  color: #2e7d32;
+}
+
+.subscription-status.cancelled,
+.subscription-status.suspended,
+.subscription-status.past_due {
+  color: #c62828;
+}
+
+.subscription-meta {
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+}
+
+.subscription-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.subscription-actions .btn {
+  font-size: 0.85rem;
+  padding: 0.4rem 0.75rem;
+}
+/* Subscription Card Container */
+#subscriptionsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin-top: 1rem;
+}
+
+/* Individual Subscription Card */
+.subscription-item {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 1.25rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.subscription-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+/* Header */
+.subscription-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.subscription-plan {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+/* Status Badge */
+.subscription-status {
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.subscription-status.active {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.subscription-status.cancelled {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.subscription-status.suspended {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.subscription-status.past_due {
+  background: #fde68a;
+  color: #92400e;
+}
+
+/* Meta Info */
+.subscription-meta p {
+  margin: 0.25rem 0;
+  font-size: 0.9rem;
+  color: #374151;
+}
+
+.subscription-meta .label {
+  font-weight: 600;
+  color: #111827;
+}
+
+/* Actions */
+.subscription-actions {
+  margin-top: 1rem;
+  display: flex;
+  gap: 0.75rem;
+}
+
+.subscription-actions .btn {
+  padding: 0.45rem 0.9rem;
+  font-size: 0.85rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+/* Primary Button */
+.subscription-actions .btn {
+  background: #2563eb;
+  color: white;
+  border: none;
+}
+
+.subscription-actions .btn:hover {
+  background: #1e40af;
+}
+
+/* Secondary Button */
+.subscription-actions .btn.secondary {
+  background: #f3f4f6;
+  color: #111827;
+}
+
+.subscription-actions .btn.secondary:hover {
+  background: #e5e7eb;
+}
+/* Subscription Card Container */
+#subscriptionsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin-top: 1rem;
+}
+
+/* Individual Subscription Card */
+.subscription-item {
+  background: #FFF5EA; /* pastel peach */
+  border: 1px solid #FFE0B3; /* pastel tangerine */
+  border-radius: 12px;
+  padding: 1.25rem;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.06);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.subscription-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.10);
+}
+
+/* Header */
+.subscription-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.subscription-plan {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #8b6d0c; /* brown-gold */
+}
+
+/* Status Badge */
+.subscription-status {
+  padding: 0.3rem 0.7rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+/* Status Colors */
+.subscription-status.active {
+  background: #DFFFD6;
+  color: #065f46;
+}
+
+.subscription-status.cancelled {
+  background: #F4B3B3; /* rose */
+  color: #b50202; /* brand red */
+}
+
+.subscription-status.suspended {
+  background: #FFE89C; /* soft gold */
+  color: #8b6d0c; /* brown-gold */
+}
+
+.subscription-status.past_due {
+  background: #FFD699; /* pastel orange */
+  color: #8b6d0c;
+}
+
+/* Meta Info */
+.subscription-meta p {
+  margin: 0.25rem 0;
+  font-size: 0.9rem;
+  color: #8b6d0c; /* brown-gold */
+}
+
+.subscription-meta .label {
+  font-weight: 700;
+  color: #004AAA; /* brand blue */
+}
+
+/* Actions */
+.subscription-actions {
+  margin-top: 1rem;
+  display: flex;
+  gap: 0.75rem;
+}
+
+/* Primary Button */
+.subscription-actions .btn {
+  padding: 0.45rem 0.9rem;
+  font-size: 0.85rem;
+  border-radius: 6px;
+  cursor: pointer;
+  border: none;
+  background: #FF940E; /* medium orange */
+  color: white;
+  transition: background 0.2s ease;
+}
+
+.subscription-actions .btn:hover {
+  background: #FD8100; /* deeper orange */
+}
+
+/* Secondary Button */
+.subscription-actions .btn.secondary {
+  background: #FFE0B3; /* pastel tangerine */
+  color: #8b6d0c; /* brown-gold */
+}
+
+.subscription-actions .btn.secondary:hover {
+  background: #FFD699; /* pastel orange */
+}
 
 /* Badge styling */
 .badge-list li {
@@ -273,14 +587,47 @@ body {
   color: #003580;
 }
 
+/* Bigger badge icons */
+.badge-icon {
+  width: 42px;
+  height: 42px;
+  font-size: 1.4rem;
+  border-radius: 50%;
+  background: var(--brand-lightblue);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+
+/* Bigger referral badge icons */
 .badge-icon.referral {
   background: var(--brand-lightorange);
   color: var(--brand-red);
 }
 
-.badge-label {
-  flex: 1;
+/* Bigger badge rows */
+.badge-item {
+  padding: 10px 6px;
+  font-size: 1.1rem;
 }
+
+/* Tooltip spacing for larger badges */
+.badge-tooltip {
+  left: 50px;
+  width: 260px;
+  font-size: 0.9rem;
+}
+
+/* Bigger progress bar */
+.badge-progress {
+  height: 8px;
+}
+
+.badge-progress-fill {
+  height: 100%;
+}
+
 
 /* Notes */
 .notes-box {
@@ -377,4 +724,104 @@ body {
   .card {
     margin-bottom: 16px;
   }
+}
+.badge-item {
+  position: relative;
+  cursor: pointer;
+}
+
+.badge-tooltip {
+  display: none;
+  position: absolute;
+  left: 40px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: #fff;
+  border: 1px solid #ccc;
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  width: 220px;
+  z-index: 20;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+
+.badge-item:hover .badge-tooltip {
+  display: block;
+}
+
+.badge-progress {
+  margin-top: 6px;
+  height: 6px;
+  background: #eee;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.badge-progress-fill {
+  height: 100%;
+  background: var(--brand-blue);
+  width: 0%;
+}
+/* ============================
+   BADGE ANIMATIONS
+   ============================ */
+
+/* Subtle glow for earned badges */
+.badge-item.earned {
+  animation: badgeGlow 2.5s ease-in-out infinite alternate;
+}
+
+@keyframes badgeGlow {
+  0% { box-shadow: 0 0 6px rgba(255, 215, 0, 0.4); }
+  100% { box-shadow: 0 0 14px rgba(255, 215, 0, 0.9); }
+}
+
+/* Pop-in animation when badge first appears */
+.badge-item.pop-in {
+  animation: popIn 0.6s ease-out forwards;
+  transform: scale(0.4);
+  opacity: 0;
+}
+
+@keyframes popIn {
+  0% { transform: scale(0.4); opacity: 0; }
+  60% { transform: scale(1.15); opacity: 1; }
+  100% { transform: scale(1); }
+}
+
+/* Shine sweep animation */
+.badge-item.earned::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -80%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(
+    120deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.6) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: skewX(-20deg);
+  animation: shineSweep 3s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes shineSweep {
+  0% { left: -80%; }
+  100% { left: 140%; }
+}
+
+/* Hover lift */
+.badge-item:hover {
+  transform: translateY(-4px) scale(1.05);
+  transition: transform 0.2s ease;
+}
+
+/* Make sure badge-item is positioned for animations */
+.badge-item {
+  position: relative;
+  overflow: hidden;
 }

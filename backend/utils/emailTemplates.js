@@ -1,7 +1,7 @@
 // utils/emailTemplates.js
 
 // Welcome Email Template
-export function welcomeEmail({ brand, firstName, email, role, dashboardUrl, supportEmail, logoUrl, websiteUrl }) {
+function welcomeEmail({ brand, firstName, email, role, dashboardUrl, supportEmail, logoUrl, websiteUrl }) {
   const year = new Date().getFullYear();
   return `
   <!DOCTYPE html>
@@ -38,7 +38,7 @@ export function welcomeEmail({ brand, firstName, email, role, dashboardUrl, supp
 }
 
 // Purchase Confirmation Email Template
-export function purchaseEmail({ brand, firstName, orderId, transactionId, orderDate, currency, total, items, dashboardUrl, supportEmail, logoUrl, websiteUrl }) {
+function purchaseEmail({ brand, firstName, orderId, transactionId, orderDate, currency, total, items, dashboardUrl, supportEmail, logoUrl, websiteUrl }) {
   const year = new Date().getFullYear();
   const itemsHtml = items.map(item => `<li>${item.name} — ${currency} ${item.price.toFixed(2)}</li>`).join('');
   return `
@@ -80,7 +80,7 @@ export function purchaseEmail({ brand, firstName, orderId, transactionId, orderD
 }
 
 // Password Reset Email Template
-export function resetPasswordEmail({ brand, firstName, resetLink, supportEmail, logoUrl, websiteUrl }) {
+function resetPasswordEmail({ brand, firstName, resetLink, supportEmail, logoUrl, websiteUrl }) {
   const year = new Date().getFullYear();
   return `
   <!DOCTYPE html>
@@ -109,7 +109,7 @@ export function resetPasswordEmail({ brand, firstName, resetLink, supportEmail, 
 }
 
 // Subscription Renewal Reminder Email Template
-export function subscriptionRenewalEmail({ 
+function subscriptionRenewalEmail({ 
   brand, 
   firstName, 
   subscriptionName, 
@@ -150,8 +150,17 @@ export function subscriptionRenewalEmail({
   </body>
   </html>`;
 }
+
+// Export all functions (CommonJS)
+module.exports = {
+  welcomeEmail,
+  purchaseEmail,
+  resetPasswordEmail,
+  subscriptionRenewalEmail
+};
+
 // Class Booking Confirmation Email Template
-export function classBookingEmail({
+function classBookingEmail({
   brand,
   firstName,
   className,

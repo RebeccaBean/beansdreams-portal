@@ -1,8 +1,15 @@
+// backend/routes/email.js
+const express = require("express");
+const router = express.Router();
+const { sendEmail } = require("../utils/mailer"); // adjust path if needed
+
 router.post("/email/send", async (req, res) => {
   try {
     const { template, payload } = req.body;
 
-    if (!template) return res.status(400).json({ error: "Missing template" });
+    if (!template) {
+      return res.status(400).json({ error: "Missing template" });
+    }
 
     await sendEmail(template, payload); // your Nodemailer wrapper
 
@@ -12,3 +19,5 @@ router.post("/email/send", async (req, res) => {
     res.status(500).json({ error: "Email send failed" });
   }
 });
+
+module.exports = router;

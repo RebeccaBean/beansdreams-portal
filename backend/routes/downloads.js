@@ -1,12 +1,12 @@
 // backend/routes/downloads.js
-import express from "express";
-import db from "../db.js";
-import { syncPendingForStudent } from "../utils/syncPending.js";
+const express = require("express");
+const db = require("../db");
+const { syncPendingForStudent } = require("../utils/syncPending");
 
 const router = express.Router();
 
 /**
- * ✅ POST /students/:uid/downloads
+ * POST /students/:uid/downloads
  * Grants a download entitlement.
  * If student does NOT exist → store as pending download.
  * If student exists → sync pending + grant download.
@@ -20,11 +20,11 @@ router.post("/students/:uid/downloads", async (req, res) => {
       return res.status(400).json({ error: "Missing productId" });
     }
 
-    // ✅ Check if student exists
+    // Check if student exists
     const student = await db.students.findByPk(uid);
 
     if (!student) {
-      // ✅ Store as pending download (pre‑signup)
+      // Store as pending download (pre‑signup)
       await db.pendingDownloads.create({
         email: email || null,
         productId,
@@ -38,10 +38,10 @@ router.post("/students/:uid/downloads", async (req, res) => {
       });
     }
 
-    // ✅ Sync ALL pending data before granting new download
+    // Sync ALL pending data before granting new download
     await syncPendingForStudent(student);
 
-    // ✅ Grant download
+    // Grant download
     await db.downloads.create({
       studentId: uid,
       productId
@@ -55,7 +55,7 @@ router.post("/students/:uid/downloads", async (req, res) => {
 });
 
 /**
- * ✅ GET /students/:uid/downloads
+ * GET /students/:uid/downloads
  * Returns all download entitlements.
  * Automatically syncs pending downloads first.
  */
@@ -68,7 +68,7 @@ router.get("/students/:uid/downloads", async (req, res) => {
       return res.status(404).json({ error: "Student not found" });
     }
 
-    // ✅ Sync ALL pending data before returning downloads
+    // Sync ALL pending data before returning downloads
     await syncPendingForStudent(student);
 
     const downloads = await db.downloads.findAll({
@@ -82,4 +82,4 @@ router.get("/students/:uid/downloads", async (req, res) => {
   }
 });
 
-export default router;
+module.exports = router;

@@ -1,6 +1,6 @@
 // utils/mailer.js
-import nodemailer from "nodemailer";
-import { google } from "googleapis";
+const nodemailer = require("nodemailer");
+const { google } = require("googleapis");
 
 // Configure OAuth2 client
 const oAuth2Client = new google.auth.OAuth2(
@@ -10,26 +10,32 @@ const oAuth2Client = new google.auth.OAuth2(
 );
 
 // Set refresh token
-oAuth2Client.setCredentials({ refresh_token: process.env.OAUTH_REFRESH_TOKEN });
+oAuth2Client.setCredentials({
+  refresh_token: process.env.OAUTH_REFRESH_TOKEN,
+});
 
 /**
  * Generic sendEmail function using Gmail OAuth2
  */
-export async function sendEmail(to, subject, html) {
+async function sendEmail(to, subject, html) {
   try {
     // Get a fresh access token
-    const accessToken = await oAuth2Client.getAccessToken();
+    const accessTokenObject = await oAuth2Client.getAccessToken();
+    const accessToken =
+      typeof accessTokenObject === "string"
+        ? accessTokenObject
+        : accessTokenObject?.token;
 
     // Create transporter
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
         type: "OAuth2",
-        user: process.env.EMAIL_USER, // your Gmail address
+        user: process.env.EMAIL_USER,
         clientId: process.env.OAUTH_CLIENT_ID,
         clientSecret: process.env.OAUTH_CLIENT_SECRET,
         refreshToken: process.env.OAUTH_REFRESH_TOKEN,
-        accessToken: accessToken.token,
+        accessToken,
       },
     });
 
@@ -48,4 +54,8 @@ export async function sendEmail(to, subject, html) {
     throw err;
   }
 }
+
+module.exports = {
+  sendEmail,
+};
 

@@ -1,19 +1,22 @@
-// backend/routes/webhooks.js
-import express from "express";
-import db from "../db.js";
-import { syncPendingForStudent } from "../utils/syncPending.js";
-
+// backend/routes/paypal.js
+const express = require("express");
 const router = express.Router();
+const db = require("../db");
 
-/* -------------------------------------------------------
-   ✅ PAYPAL WEBHOOK
-   Receives verified events forwarded from your PayPal server.
--------------------------------------------------------- */
+// If you're using node-fetch:
+const fetch = require("node-fetch");
+
+// Load from environment
+const PORTAL_API_URL = process.env.PORTAL_API_URL;
+
+/**
+ * PayPal Webhook Receiver
+ */
 router.post("/paypal", async (req, res) => {
   try {
     const { body, receivedAt } = req.body;
 
-    // ✅ Log webhook
+    // Log webhook
     await db.paypalWebhooks.create({
       body,
       receivedAt: receivedAt || new Date().toISOString()
@@ -22,16 +25,23 @@ router.post("/paypal", async (req, res) => {
     const eventType = body.event_type;
     const resource = body.resource;
 
-    const email =
-      resource?.payer?.email_address ||
-      resource?.subscriber?.email_address ||
+    // Extract subscription ID if present
+    const subscriptionId =
+      resource?.id ||
+      resource?.billing_agreement_id ||
+      resource?.subscription_id ||
       null;
 
     /* -------------------------------------------------------
-       ✅ 1. PAYMENT CAPTURE COMPLETED
-       → Create pending order (user may not exist yet)
+       1️⃣ PAYMENT.CAPTURE.COMPLETED
+       → Create pending order (cart-less PayPal purchase)
     -------------------------------------------------------- */
     if (eventType === "PAYMENT.CAPTURE.COMPLETED") {
+      const email =
+        resource?.payer?.email_address ||
+        resource?.subscriber?.email_address ||
+        null;
+
       const orderId =
         resource.supplementary_data?.related_ids?.order_id ||
         resource.invoice_id ||
@@ -51,45 +61,83 @@ router.post("/paypal", async (req, res) => {
     }
 
     /* -------------------------------------------------------
-       ✅ 2. SUBSCRIPTION PAYMENT SUCCEEDED
-       → Apply credits or store pending subscription
+       2️⃣ SUBSCRIPTION EVENTS
+       Forward to portal subscription handlers
     -------------------------------------------------------- */
-    if (
-      eventType === "BILLING.SUBSCRIPTION.PAYMENT.SUCCEEDED" ||
-      eventType === "BILLING.SUBSCRIPTION.CHARGED_SUCCESSFULLY"
-    ) {
-      const subscriptionId =
-        resource?.id || resource?.billing_agreement_id || null;
 
-      const sub = await db.subscriptions.findOne({
-        where: { paypalSubscriptionId: subscriptionId }
-      });
-
-      if (!sub) {
-        // ✅ Store as pending subscription
-        await db.pendingSubscriptions.create({
-          email,
-          planType: "classPass",
+    // Subscription activated
+    if (eventType === "BILLING.SUBSCRIPTION.ACTIVATED") {
+      await fetch(`${PORTAL_API_URL}/subscriptions/update-status`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
           paypalSubscriptionId: subscriptionId,
-          status: "renewal",
-          meta: resource
-        });
-
-        return res.json({ success: true });
-      }
-
-      // ✅ Apply renewal credits
-      await db.creditTransactions.create({
-        studentId: sub.studentId,
-        delta: 4,
-        typeBreakdown: { Any: 4 },
-        source: "paypal_subscription_renewal",
-        meta: resource
+          status: "active"
+        })
       });
 
       return res.json({ success: true });
     }
 
+    // Subscription cancelled
+    if (eventType === "BILLING.SUBSCRIPTION.CANCELLED") {
+      await fetch(`${PORTAL_API_URL}/subscriptions/update-status`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          paypalSubscriptionId: subscriptionId,
+          status: "cancelled"
+        })
+      });
+
+      return res.json({ success: true });
+    }
+
+    // Subscription suspended
+    if (eventType === "BILLING.SUBSCRIPTION.SUSPENDED") {
+      await fetch(`${PORTAL_API_URL}/subscriptions/update-status`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          paypalSubscriptionId: subscriptionId,
+          status: "suspended"
+        })
+      });
+
+      return res.json({ success: true });
+    }
+
+    // Payment failed
+    if (eventType === "BILLING.SUBSCRIPTION.PAYMENT.FAILED") {
+      await fetch(`${PORTAL_API_URL}/subscriptions/update-status`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          paypalSubscriptionId: subscriptionId,
+          status: "past_due"
+        })
+      });
+
+      return res.json({ success: true });
+    }
+
+    // Renewal (payment succeeded)
+    if (
+      eventType === "BILLING.SUBSCRIPTION.PAYMENT.SUCCEEDED" ||
+      eventType === "PAYMENT.SALE.COMPLETED"
+    ) {
+      await fetch(`${PORTAL_API_URL}/subscriptions/apply-renewal`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          paypalSubscriptionId: subscriptionId
+        })
+      });
+
+      return res.json({ success: true });
+    }
+
+    // Default
     res.json({ success: true });
   } catch (err) {
     console.error("PayPal webhook error:", err);
@@ -97,77 +145,4 @@ router.post("/paypal", async (req, res) => {
   }
 });
 
-/* -------------------------------------------------------
-   ✅ PRINTIFY WEBHOOK
--------------------------------------------------------- */
-router.post("/printify", async (req, res) => {
-  try {
-    const { event, receivedAt } = req.body;
-
-    await db.printifyEvents.create({
-      event,
-      receivedAt: receivedAt || new Date().toISOString()
-    });
-
-    res.json({ success: true });
-  } catch (err) {
-    console.error("Printify webhook error:", err);
-    res.status(500).json({ error: "Server error" });
-  }
-});
-
-/* -------------------------------------------------------
-   ✅ CALENDLY WEBHOOK
--------------------------------------------------------- */
-router.post("/calendly", async (req, res) => {
-  try {
-    const { event, receivedAt } = req.body;
-
-    const email = event?.payload?.invitee?.email;
-    const classTypeName = event?.payload?.event_type?.name || "Unknown";
-
-    // ✅ Log event
-    await db.calendlyEvents.create({
-      event,
-      email,
-      receivedAt: receivedAt || new Date().toISOString()
-    });
-
-    // ✅ Find student
-    const student = await db.students.findOne({ where: { email } });
-
-    if (!student) {
-      // ✅ Store as pending order (class booking)
-      await db.pendingOrders.create({
-        email,
-        order: {
-          type: "calendly_booking",
-          event,
-          classTypeName
-        },
-        createdAt: new Date().toISOString()
-      });
-
-      return res.json({ success: true });
-    }
-
-    // ✅ Sync pending data before consuming credits
-    await syncPendingForStudent(student);
-
-    // ✅ Consume 1 credit
-    await db.creditTransactions.create({
-      studentId: student.id,
-      delta: -1,
-      typeBreakdown: { [classTypeName]: -1 },
-      source: "calendly_booking",
-      meta: event
-    });
-
-    res.json({ success: true });
-  } catch (err) {
-    console.error("Calendly webhook error:", err);
-    res.status(500).json({ error: "Server error" });
-  }
-});
-
-export default router;
+module.exports = router;

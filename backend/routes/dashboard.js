@@ -1,12 +1,12 @@
 // backend/routes/dashboard.js
-import express from "express";
-import db from "../db.js";
-import { syncPendingForStudent } from "../utils/syncPending.js";
+const express = require("express");
+const db = require("../db");
+const { syncPendingForStudent } = require("../utils/syncPending");
 
 const router = express.Router();
 
 /**
- * ✅ Helper: compute credit totals from transactions
+ * Helper: compute credit totals from transactions
  */
 function computeCreditTotals(transactions) {
   let total = 0;
@@ -24,7 +24,7 @@ function computeCreditTotals(transactions) {
 }
 
 /**
- * ✅ GET /students/:uid/dashboard
+ * GET /students/:uid/dashboard
  * Returns a complete dashboard snapshot.
  * Automatically syncs ALL pending data.
  */
@@ -37,10 +37,10 @@ router.get("/students/:uid/dashboard", async (req, res) => {
       return res.status(404).json({ error: "Student not found" });
     }
 
-    // ✅ Sync ALL pending data (credits, downloads, subs, orders)
+    // Sync ALL pending data (credits, downloads, subs, orders)
     const synced = await syncPendingForStudent(student);
 
-    // ✅ Fetch updated data after sync
+    // Fetch updated data after sync
     const [credits, orders, subs, downloads] = await Promise.all([
       db.creditTransactions.findAll({ where: { studentId: uid } }),
       db.orders.findAll({
@@ -68,5 +68,4 @@ router.get("/students/:uid/dashboard", async (req, res) => {
   }
 });
 
-export default router;
-
+module.exports = router;

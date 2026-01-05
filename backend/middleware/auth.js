@@ -1,11 +1,11 @@
 // backend/middleware/auth.js
-import jwt from "jsonwebtoken";
-import db from "../db.js";
+const jwt = require("jsonwebtoken");
+const db = require("../db");
 
 /**
- * ✅ Verify JWT and attach user to req.user
+ * Verify JWT and attach user to req.user
  */
-export async function requireAuth(req, res, next) {
+async function requireAuth(req, res, next) {
   try {
     const authHeader = req.headers.authorization;
 
@@ -16,13 +16,14 @@ export async function requireAuth(req, res, next) {
     const token = authHeader.split(" ")[1];
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // Fetch user from DB
+    // Fetch user from DB (students table)
     const user = await db.students.findByPk(decoded.id);
+
     if (!user) {
       return res.status(401).json({ error: "User not found" });
     }
 
-    req.user = user; // ✅ attach user to request
+    req.user = user; // attach user to request
     next();
 
   } catch (err) {
@@ -32,9 +33,9 @@ export async function requireAuth(req, res, next) {
 }
 
 /**
- * ✅ Allow only admins
+ * Allow only admins
  */
-export function requireAdmin(req, res, next) {
+function requireAdmin(req, res, next) {
   if (!req.user || req.user.role !== "admin") {
     return res.status(403).json({ error: "Admin access required" });
   }
@@ -42,9 +43,9 @@ export function requireAdmin(req, res, next) {
 }
 
 /**
- * ✅ Allow only teachers
+ * Allow only teachers
  */
-export function requireTeacher(req, res, next) {
+function requireTeacher(req, res, next) {
   if (!req.user || req.user.role !== "teacher") {
     return res.status(403).json({ error: "Teacher access required" });
   }
@@ -52,12 +53,18 @@ export function requireTeacher(req, res, next) {
 }
 
 /**
- * ✅ Allow teachers OR admins
- * Useful for class management, grading, dashboards, etc.
+ * Allow teachers OR admins
  */
-export function requireTeacherOrAdmin(req, res, next) {
+function requireTeacherOrAdmin(req, res, next) {
   if (!req.user || !["teacher", "admin"].includes(req.user.role)) {
     return res.status(403).json({ error: "Teacher or admin access required" });
   }
   next();
 }
+
+module.exports = {
+  requireAuth,
+  requireAdmin,
+  requireTeacher,
+  requireTeacherOrAdmin
+};
