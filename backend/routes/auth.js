@@ -1,22 +1,22 @@
 // backend/routes/auth.js
-import express from "express";
-import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
-import crypto from "crypto";
-import { Op } from "sequelize";
-import db from "../db.js";
-import { sendEmail } from "../utils/mailer.js";
-import {
+const express = require("express");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+const crypto = require("crypto");
+const { Op } = require("sequelize");
+const db = require("../db");
+const { sendEmail } = require("../utils/mailer");
+const {
   welcomeEmail,
   resetPasswordEmail
-} from "../utils/emailTemplates.js";
+} = require("../utils/emailTemplates");
 
-import { syncPendingForStudent } from "../utils/syncPending.js";
+const { syncPendingForStudent } = require("../utils/syncPending");
 
 const router = express.Router();
 
 /**
- * ✅ SIGN UP — All new users become "student"
+ * SIGN UP — All new users become "student"
  */
 router.post("/signup", async (req, res) => {
   const { name, email, password } = req.body;
@@ -35,7 +35,7 @@ router.post("/signup", async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // ✅ Create student with forced role = student
+    // Create student with forced role = student
     const student = await db.students.create({
       name,
       email,
@@ -43,10 +43,10 @@ router.post("/signup", async (req, res) => {
       role: "student"
     });
 
-    // ✅ Sync ALL pending data (credits, downloads, subs, orders)
+    // Sync pending data (credits, downloads, subs, orders)
     const synced = await syncPendingForStudent(student);
 
-    // ✅ Send welcome email
+    // Send welcome email
     const html = welcomeEmail({
       brand: "Student Portal",
       firstName: student.name.split(" ")[0],
@@ -74,7 +74,7 @@ router.post("/signup", async (req, res) => {
 });
 
 /**
- * ✅ SIGN IN
+ * SIGN IN
  */
 router.post("/signin", async (req, res) => {
   const { email, password } = req.body;
@@ -90,7 +90,7 @@ router.post("/signin", async (req, res) => {
       return res.status(400).json({ error: "Invalid credentials" });
     }
 
-    // ✅ Sync ALL pending data on login too
+    // Sync pending data on login
     const synced = await syncPendingForStudent(student);
 
     const token = jwt.sign(
@@ -108,7 +108,7 @@ router.post("/signin", async (req, res) => {
 });
 
 /**
- * ✅ FORGOT PASSWORD — Sends reset email
+ * FORGOT PASSWORD — Sends reset email
  */
 router.post("/forgot-password", async (req, res) => {
   const { email } = req.body;
@@ -148,7 +148,7 @@ router.post("/forgot-password", async (req, res) => {
 });
 
 /**
- * ✅ RESET PASSWORD
+ * RESET PASSWORD
  */
 router.post("/reset-password", async (req, res) => {
   const { token, newPassword } = req.body;
@@ -180,4 +180,4 @@ router.post("/reset-password", async (req, res) => {
   }
 });
 
-export default router;
+module.exports = router;

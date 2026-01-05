@@ -3,90 +3,485 @@
 <head>
   <meta charset="UTF-8">
   <title>Buy Credits – Bean's Dreams</title>
-  <link rel="stylesheet" href="dashboard.css">
+  <link rel="stylesheet" href="buy-credits.css">
+  <link rel="stylesheet" href="css/cart.css">
 </head>
+
 <body>
+
+  <!-- HEADER -->
+  <header class="classes-header" data-aos="fade-down">
+  <!-- Logo container -->
+<div class="logo-container">
+  <img src="imageslogo/beansbutterfly.png" alt="Bean's Butterefly" class="logo-bounce-in">
+</div>
+  </header>
 
   <div class="buy-credits-container">
 
-    <h1>Buy More Credits</h1>
+    <h1>Buy Credits</h1>
     <p class="intro-text">
-      Credits let you book lessons, healing sessions, coaching, and more.  
-      Choose the option that fits your journey.
+      Choose the option that fits your journey — single classes, bundles, or monthly passes.
     </p>
 
-    <!-- Credit Types -->
+    <!-- MONTHLY SUBSCRIPTIONS -->
     <section class="card">
-      <h2>What Are Credits?</h2>
-      <ul class="credit-explainer">
-        <li>💃 <strong>Dance Credits</strong> — used for dance lessons</li>
-        <li>🎤 <strong>Vocal Credits</strong> — used for singing lessons</li>
-        <li>🎸 <strong>Guitar Credits</strong> — used for guitar lessons</li>
-        <li>⭐ <strong>Any Credits</strong> — can be used for any lesson type</li>
-        <li>✨ <strong>Healing Credits</strong> — used for healing sessions</li>
-        <li>🎧 <strong>Coaching Credits</strong> — used for coaching sessions</li>
-      </ul>
+      <h2>Monthly Subscriptions</h2>
+      <p class="section-desc">Save money with recurring monthly credits.</p>
+
+      <div class="bundle-grid">
+
+        <!-- Monthly Classes Pass -->
+        <div class="bundle-card">
+          <h3>Monthly Classes Pass</h3>
+          <p>4 Any-Class Credits / month</p>
+          <p class="price">$39/mo</p>
+          <button class="btn buy-btn" data-sub="monthly-classes-pass">Subscribe</button>
+        </div>
+
+        <!-- Monthly Coaching Pass -->
+        <div class="bundle-card">
+          <h3>Monthly Coaching Pass</h3>
+          <p>2 Coaching Credits / month</p>
+          <p class="price">$59/mo</p>
+          <button class="btn buy-btn" data-sub="monthly-coaching-pass">Subscribe</button>
+        </div>
+
+      </div>
     </section>
 
-    <!-- Bundles -->
+    <!-- SINGLE CLASS PURCHASES -->
+    <section class="card">
+      <h2>Single Class Purchases</h2>
+      <p class="section-desc">Buy one class at a time — no commitment.</p>
+
+      <div class="bundle-grid">
+
+        <!-- Single Dance Class -->
+        <div class="class-card bundle-card"
+             data-id="single_dance"
+             data-price="30"
+             data-credits="1"
+             data-type='["Dance"]'>
+
+          <div class="class-icon">💃</div>
+          <h3>Single Dance Class</h3>
+          <p>1 Dance Credit</p>
+          <p class="price">$30</p>
+
+          <button class="add-cart-btn"
+                  data-id="single_dance"
+                  data-name="Single Dance Class"
+                  data-price="30"
+                  data-type='["Dance"]'
+                  data-credits="1">
+            Add to Cart
+          </button>
+        </div>
+
+        <!-- Single Vocal Class -->
+        <div class="class-card bundle-card"
+             data-id="single_vocal"
+             data-price="30"
+             data-credits="1"
+             data-type='["Vocal"]'>
+
+          <div class="class-icon">🎤</div>
+          <h3>Single Vocal Class</h3>
+          <p>1 Vocal Credit</p>
+          <p class="price">$30</p>
+
+          <button class="add-cart-btn"
+                  data-id="single_vocal"
+                  data-name="Single Vocal Class"
+                  data-price="30"
+                  data-type='["Vocal"]'
+                  data-credits="1">
+            Add to Cart
+          </button>
+        </div>
+
+        <!-- Single Guitar Class -->
+        <div class="class-card bundle-card"
+             data-id="single_guitar"
+             data-price="30"
+             data-credits="1"
+             data-type='["Guitar"]'>
+
+          <div class="class-icon">🎸</div>
+          <h3>Single Guitar Class</h3>
+          <p>1 Guitar Credit</p>
+          <p class="price">$30</p>
+
+          <button class="add-cart-btn"
+                  data-id="single_guitar"
+                  data-name="Single Guitar Class"
+                  data-price="30"
+                  data-type='["Guitar"]'
+                  data-credits="1">
+            Add to Cart
+          </button>
+        </div>
+
+        <!-- Single Healing Class -->
+        <div class="class-card bundle-card"
+             data-id="single_healing"
+             data-price="80"
+             data-credits="1"
+             data-type='["Healing"]'>
+
+          <div class="class-icon">🕊️</div>
+          <h3>Single Healing Class</h3>
+          <p>1 Healing Credit</p>
+          <p class="price">$80</p>
+
+          <button class="add-cart-btn"
+                  data-id="single_healing"
+                  data-name="Single Healing Class"
+                  data-price="80"
+                  data-type='["Healing"]'
+                  data-credits="1">
+            Add to Cart
+          </button>
+        </div>
+
+        <!-- Single Coaching Session (keep this one) -->
+        <div class="class-card bundle-card"
+             data-id="single_coaching"
+             data-price="120"
+             data-credits="1"
+             data-type='["Coaching"]'>
+
+          <div class="class-icon">🔱</div>
+          <h3>Single Coaching Session</h3>
+          <p>1 Coaching Credit</p>
+          <p class="price">$120</p>
+
+          <button class="add-cart-btn"
+                  data-id="single_coaching"
+                  data-name="Single Coaching Session"
+                  data-price="120"
+                  data-type='["Coaching"]'
+                  data-credits="1">
+            Add to Cart
+          </button>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- CREDIT BUNDLES -->
     <section class="card">
       <h2>Credit Bundles</h2>
+      <p class="section-desc">Save more with multi-class bundles.</p>
+
+      <!-- Dance / Movement -->
+      <h3 class="category-title">Dance / Movement</h3>
       <div class="bundle-grid">
 
-        <div class="bundle-card">
-          <h3>Starter Pack</h3>
-          <p>4 Any Credits</p>
-          <p class="price">$49</p>
-          <button class="btn buy-btn" data-bundle="starter">Buy Now</button>
+        <!-- Dance & Music Fusion -->
+        <div class="class-card bundle-card"
+             data-id="bundle_dance_music"
+             data-price="190"
+             data-credits="8"
+             data-type='["Dance","Any"]'>
+
+          <div class="class-icon">🎶💃</div>
+          <h3>Dance & Music Fusion</h3>
+          <p>A lively blend of dance and music classes designed to build coordination, confidence, and creative expression through movement and rhythm.</p>
+          <p class="price">$190 – 📦 4 Dance + 4 Music Classes</p>
+
+          <button class="add-cart-btn"
+                  data-id="bundle_dance_music"
+                  data-name="Dance & Music Fusion"
+                  data-price="190"
+                  data-type='["Dance","Any"]'
+                  data-credits="8">
+            Add to Cart
+          </button>
         </div>
 
-        <div class="bundle-card">
-          <h3>Growth Pack</h3>
-          <p>10 Any Credits</p>
-          <p class="price">$99</p>
-          <button class="btn buy-btn" data-bundle="growth">Buy Now</button>
+        <!-- Treble Treat -->
+        <div class="class-card bundle-card"
+             data-id="bundle_treble_treat"
+             data-price="70"
+             data-credits="3"
+             data-type='["Vocal","Guitar","Dance"]'>
+
+          <div class="class-icon">🎤🎸🥁</div>
+          <h3>Treble Treat</h3>
+          <p>Strum, sing, or groove—each class builds confidence and keeps your musical journey fun. Perfect for learners who want variety and a taste of different styles in one bundle.</p>
+          <p class="price">$70 – 📦 1 Vocal + 1 Guitar + 1 Dance</p>
+
+          <button class="add-cart-btn"
+                  data-id="bundle_treble_treat"
+                  data-name="Treble Treat"
+                  data-price="70"
+                  data-type='["Vocal","Guitar","Dance"]'
+                  data-credits="3">
+            Add to Cart
+          </button>
         </div>
 
-        <div class="bundle-card">
-          <h3>Master Pack</h3>
-          <p>20 Any Credits</p>
-          <p class="price">$179</p>
-          <button class="btn buy-btn" data-bundle="master">Buy Now</button>
+        <!-- Creative Expression Pack -->
+        <div class="class-card bundle-card"
+             data-id="bundle_creative_expression"
+             data-price="140"
+             data-credits="6"
+             data-type='["Dance","Vocal"]'>
+
+          <div class="class-icon">🎨💃🎤</div>
+          <h3>Creative Expression Pack</h3>
+          <p>An energizing mix of movement and music, designed to build confidence, skill, and artistic freedom. Elevate your creative expression with dance and vocal classes.</p>
+          <p class="price">$140 – 📦 3 Dance + 3 Vocal</p>
+
+          <button class="add-cart-btn"
+                  data-id="bundle_creative_expression"
+                  data-name="Creative Expression Pack"
+                  data-price="140"
+                  data-type='["Dance","Vocal"]'
+                  data-credits="6">
+            Add to Cart
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Singing & Guitar -->
+      <h3 class="category-title">Singing & Guitar</h3>
+      <div class="bundle-grid">
+
+        <!-- Melody Makers Jam -->
+        <div class="class-card bundle-card"
+             data-id="bundle_melody_makers"
+             data-price="280"
+             data-credits="12"
+             data-type='["Vocal","Guitar"]'>
+
+          <div class="class-icon">🎤🎸</div>
+          <h3>Melody Makers Jam</h3>
+          <p>A focused blend of vocal and guitar training to strengthen both your voice and instrumental skills—perfect for performers, creators, and anyone who loves making music.</p>
+          <p class="price">$280 – 📦 6 Vocal + 6 Guitar</p>
+
+          <button class="add-cart-btn"
+                  data-id="bundle_melody_makers"
+                  data-name="Melody Makers Jam"
+                  data-price="280"
+                  data-type='["Vocal","Guitar"]'
+                  data-credits="12">
+            Add to Cart
+          </button>
+        </div>
+
+        <!-- Encore Elite -->
+        <div class="class-card bundle-card"
+             data-id="bundle_encore_elite"
+             data-price="190"
+             data-credits="8"
+             data-type="Any">
+
+          <div class="class-icon">🌟</div>
+          <h3>Encore Elite</h3>
+          <p>A curated set of eight classes designed to elevate your technique, creativity, and performance across music, dance, and the arts.</p>
+          <p class="price">$190 – 📦 8 Classes</p>
+
+          <button class="add-cart-btn"
+                  data-id="bundle_encore_elite"
+                  data-name="Encore Elite"
+                  data-price="190"
+                  data-type="Any"
+                  data-credits="8">
+            Add to Cart
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Healing -->
+      <h3 class="category-title">Healing</h3>
+      <div class="bundle-grid">
+
+        <!-- Serenity Series -->
+        <div class="class-card bundle-card"
+             data-id="bundle_serenity"
+             data-price="450"
+             data-credits="6"
+             data-type="Healing">
+
+          <div class="class-icon">🪷</div>
+          <h3>The Serenity Series</h3>
+          <p>A calming set of six healing classes designed to restore your mind, body, and spirit—ideal for gentle renewal and emotional reset.</p>
+          <p class="price">$450 – 📦 6 Healing Classes</p>
+
+          <button class="add-cart-btn"
+                  data-id="bundle_serenity"
+                  data-name="Serenity Series"
+                  data-price="450"
+                  data-type="Healing"
+                  data-credits="6">
+            Add to Cart
+          </button>
+        </div>
+
+        <!-- Harmony Healers Pack -->
+        <div class="class-card bundle-card"
+             data-id="bundle_harmony_healers"
+             data-price="350"
+             data-credits="6"
+             data-type='["Healing","Any"]'>
+
+          <div class="class-icon">🪷🎶</div>
+          <h3>Harmony Healers Pack</h3>
+          <p>Restore balance and spark creativity with this soothing bundle of four healing classes and two music sessions.</p>
+          <p class="price">$350 – 📦 4 Healing + 2 Music</p>
+
+          <button class="add-cart-btn"
+                  data-id="bundle_harmony_healers"
+                  data-name="Harmony Healers Pack"
+                  data-price="350"
+                  data-type='["Healing","Any"]'
+                  data-credits="6">
+            Add to Cart
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Flexible / Multi‑Discipline -->
+      <h3 class="category-title">Flexible / Multi‑Discipline</h3>
+      <div class="bundle-grid">
+
+        <!-- Dreamer’s Dozen -->
+        <div class="class-card bundle-card"
+             data-id="bundle_dreamers_dozen"
+             data-price="280"
+             data-credits="12"
+             data-type="Any">
+
+          <div class="class-icon">🌟</div>
+          <h3>Dreamer’s Dozen</h3>
+          <p>A balanced mix of vocal and guitar training to strengthen both your voice and instrumental skills. Ideal for performers and anyone looking to expand their musical expression.</p>
+          <p class="price">$280 – 📦 Any 12 Classes</p>
+
+          <button class="add-cart-btn"
+                  data-id="bundle_dreamers_dozen"
+                  data-name="Dreamer’s Dozen"
+                  data-price="280"
+                  data-type="Any"
+                  data-credits="12">
+            Add to Cart
+          </button>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- COACHING PACKAGES (FINAL SECTION) -->
+    <section class="card" aria-labelledby="packages-heading" data-aos="fade-up">
+      <h2 id="packages-heading">Coaching Packages</h2>
+      <p class="section-desc">
+        Choose a pathway that fits your needs. Purchase first, then schedule — clients pay before booking.
+      </p>
+
+      <div class="bundle-grid">
+
+        <!-- 4-Session Coaching Package -->
+        <div class="class-card bundle-card"
+             data-id="coach_4session"
+             data-price="420"
+             data-credits="4"
+             data-type="Coaching">
+
+          <div class="class-icon">❤️📘</div>
+          <h3>4-Session Package</h3>
+          <p>Four 50-minute sessions for deeper recovery work and ongoing support. Includes email check-ins and a personalized progress roadmap.</p>
+          <p class="price">$420 – 📦 4 sessions</p>
+
+          <button class="add-cart-btn"
+                  data-name="4-Session Coaching Package"
+                  data-price="420"
+                  data-credits="4"
+                  data-type="Coaching"
+                  data-id="coach_4session">
+            Add to Cart
+          </button>
+        </div>
+
+        <!-- Monthly Coaching -->
+        <div class="class-card bundle-card"
+             data-id="coach_monthly"
+             data-price="750"
+             data-credits="8"
+             data-type="Coaching">
+
+          <div class="class-icon">🕊️🌸</div>
+          <h3>Monthly Coaching</h3>
+          <p>Ongoing support with one 50-minute session per week for 2 months. Priority messaging, short practices, and progress check-ins included.</p>
+          <p class="price">$750 – 📦 8 sessions</p>
+
+          <button class="add-cart-btn"
+                  data-name="Monthly Coaching"
+                  data-price="750"
+                  data-credits="8"
+                  data-type="Coaching"
+                  data-id="coach_monthly">
+            Add to Cart
+          </button>
+        </div>
+
+        <!-- Deep Healing Intensive -->
+        <div class="class-card bundle-card"
+             data-id="coach_deep"
+             data-price="950"
+             data-credits="10"
+             data-type="Coaching">
+
+          <div class="class-icon">🌙✨</div>
+          <h3>Deep Healing Intensive</h3>
+          <p>A transformative 6-week coaching journey for those seeking lasting recovery and inner peace. Includes reflection work and bonus resources.</p>
+          <p class="price">$950 – 📦 10 sessions</p>
+
+          <button class="add-cart-btn"
+                  data-name="Deep Healing Intensive"
+                  data-price="950"
+                  data-credits="10"
+                  data-type="Coaching"
+                  data-id="coach_deep">
+            Add to Cart
+          </button>
         </div>
 
       </div>
     </section>
 
-    <!-- Subscriptions -->
-    <section class="card">
-      <h2>Subscriptions</h2>
-      <p>Subscriptions renew monthly and include bonus credits.</p>
+  </div> <!-- closes .buy-credits-container -->
 
-      <div class="bundle-grid">
+  <!-- CART SIDEBAR -->
+  <div id="cart" class="cart-sidebar" aria-label="Shopping cart" aria-hidden="true" role="complementary">
+    <h3>Your Cart</h3>
+    <ul id="cart-items"></ul>
+    <div class="cart-total">Total: $<span id="cart-total">0.00</span></div>
 
-        <div class="bundle-card">
-          <h3>ClassPass Basic</h3>
-          <p>4 Any Credits / month</p>
-          <p class="price">$39/mo</p>
-          <button class="btn buy-btn" data-sub="basic">Subscribe</button>
-        </div>
+    <div id="hidden-paypal" style="display:none;"></div>
 
-        <div class="bundle-card">
-          <h3>ClassPass Plus</h3>
-          <p>8 Any Credits / month</p>
-          <p class="price">$69/mo</p>
-          <button class="btn buy-btn" data-sub="plus">Subscribe</button>
-        </div>
-
-      </div>
-    </section>
-
-    <button class="btn btn-secondary" onclick="window.location.href='/dashboard.html'">
-      Back to Dashboard
-    </button>
-
+    <button id="checkout-btn" class="btn checkout-btn">Checkout</button>
+    <button id="close-cart" class="btn close-cart-btn" aria-label="Close cart">Close</button>
   </div>
 
+  <!-- CART TOGGLE BUTTON -->
+  <button id="cart-toggle" class="btn cart-toggle-btn" aria-label="Toggle cart">
+    🛒 Cart (<span id="cart-count">0</span>)
+  </button>
+
+  <!-- BACK BUTTON -->
+  <button class="btn btn-secondary back-btn" onclick="window.location.href='/dashboard.html'">
+    Back to Dashboard
+  </button>
+
+  <!-- SCRIPTS -->
   <script src="buy-credits.js"></script>
+  <script src="js/cart.js" defer></script>
+
 </body>
 </html>

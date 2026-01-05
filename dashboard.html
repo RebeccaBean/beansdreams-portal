@@ -12,40 +12,50 @@
 </head>
 <body>
 
-  <!-- Sidebar navigation -->
+  <!-- Sidebar -->
   <aside class="sidebar">
     <div class="sidebar-brand">
       <div class="brand-logo">Bean's Dreams</div>
       <div class="brand-subtitle">Student Portal</div>
     </div>
-    <nav class="sidebar-nav">
-  <a href="#section-overview"><i class="fa-solid fa-house"></i> Overview</a>
-  <a href="#section-subscriptions"><i class="fa-solid fa-receipt"></i> Subscriptions</a>
-  <a href="#section-credits"><i class="fa-solid fa-coins"></i> Remaining Credits</a>
-  <a href="#section-downloads"><i class="fa-solid fa-download"></i> Downloads</a>
-  <a href="#section-uploads"><i class="fa-solid fa-upload"></i> Uploads</a>
-  <a href="#section-referrals"><i class="fa-solid fa-share-nodes"></i> Referrals & Sharing</a>
-  <a href="#section-achievements"><i class="fa-solid fa-trophy"></i> Achievement Badges</a>
-  <a href="#section-sessions"><i class="fa-solid fa-video"></i> Lessons & Sessions</a>
-  <a href="#section-instructor-notes"><i class="fa-solid fa-chalkboard-user"></i> Instructor Notes</a>
-  <a href="#section-student-notes"><i class="fa-solid fa-pen-to-square"></i> Your Notes</a>
-</nav>
 
+    <nav class="sidebar-nav">
+      <a href="#section-overview">🏠 Overview</a>
+      <a href="#section-subscriptions">📄 Subscriptions</a>
+      <a href="#section-credits">💰 Remaining Credits</a>
+      <a href="#section-downloads">⬇️ Downloads</a>
+      <a href="#section-uploads">⬆️ Uploads</a>
+      <a href="#section-referrals">🔗 Referrals & Sharing</a>
+      <a href="#section-achievements">🏆 Achievement Badges</a>
+      <a href="#section-sessions">🎥 Lessons & Sessions</a>
+      <a href="#section-instructor-notes">🧑‍🏫 Instructor Notes</a>
+      <a href="#section-student-notes">✏️ Your Notes</a>
+    </nav>
   </aside>
 
-  <!-- Main content -->
+  <!-- Main layout -->
   <div class="main-layout">
-    <header class="top-bar">
-      <div class="top-left" id="section-overview">
-        <h1 class="page-title">Student Dashboard</h1>
-        <p class="welcome-text">Welcome back, <span id="studentName">Student</span></p>
+
+    <!-- Top bar -->
+    <header class="top-bar" id="section-overview">
+      <div style="display:flex;align-items:center;gap:0.5rem;">
+        <button id="sidebarToggle" class="hamburger-btn" aria-label="Toggle navigation">☰</button>
+
+        <div>
+          <h1 class="page-title">Student Dashboard</h1>
+          <p class="welcome-text">
+            Welcome back, <span id="studentName">Student</span>
+          </p>
+        </div>
       </div>
+
       <div class="top-right">
         <span id="studentEmail" class="user-email"></span>
         <button id="logoutBtn" class="btn btn-outline">Logout</button>
       </div>
     </header>
 
+    <!-- Dashboard content -->
     <main class="dashboard-container">
 
       <!-- Column 1 -->
@@ -53,68 +63,68 @@
 
         <!-- Subscriptions -->
         <div class="card" id="section-subscriptions">
-          <h2>Subscriptions</h2>
-          <p><span class="label">Current plan:</span> <span id="billingPlan">Loading...</span></p>
-          <p><span class="label">Next payment:</span> <span id="billingNext">Loading...</span></p>
-          <button id="manageBillingBtn" class="btn">Manage Billing</button>
+          <h2>📄 Subscriptions</h2>
+          <div id="subscriptionsContainer">
+            <p id="subscriptionsLoading">Loading...</p>
+          </div>
         </div>
 
         <!-- Credits -->
         <div class="card" id="section-credits">
-          <h2>Billing & Credits</h2>
+          <h2>💰 Remaining Credits</h2>
 
-          <div class="credit-grid">
-
-            <div class="credit-item">
-              <span class="credit-label">Dance</span>
-              <span id="danceCredits" class="credit-value">0</span>
-            </div>
-
-            <div class="credit-item">
-              <span class="credit-label">Vocal</span>
-              <span id="vocalCredits" class="credit-value">0</span>
-            </div>
-
-            <div class="credit-item">
-              <span class="credit-label">Guitar</span>
-              <span id="guitarCredits" class="credit-value">0</span>
-            </div>
-
-            <div class="credit-item">
-              <span class="credit-label">Any</span>
-              <span id="anyCredits" class="credit-value">0</span>
-            </div>
-
-            <div class="credit-item special">
-              <span class="credit-label">Healing</span>
-              <span id="healingCredits" class="credit-value">0</span>
-              <span class="credit-note">x<span id="healingValue">1</span></span>
-            </div>
-
-            <div class="credit-item special">
-              <span class="credit-label">Coaching</span>
-              <span id="coachingCredits" class="credit-value">0</span>
-              <span class="credit-note">x<span id="coachingValue">1</span></span>
-            </div>
-
+          <div class="credits-count">
+            Total credits: <span id="creditsCount">0</span>
           </div>
 
-          <div class="billing-plan">
-            <h3>Active Plan</h3>
-            <p id="activePlan">None</p>
+          <div class="credit-item">
+            <span class="credit-icon">💃</span>
+            <span class="label">Dance</span>
+            <span id="danceCredits">0</span>
           </div>
 
-          <div class="billing-bundles">
-            <h3>Purchased Bundles</h3>
-            <ul id="bundleList"></ul>
+          <div class="credit-item">
+            <span class="credit-icon">🎤</span>
+            <span class="label">Vocal</span>
+            <span id="vocalCredits">0</span>
           </div>
+
+          <div class="credit-item">
+            <span class="credit-icon">🎸</span>
+            <span class="label">Guitar</span>
+            <span id="guitarCredits">0</span>
+          </div>
+
+          <div class="credit-item">
+            <span class="credit-icon">⭐</span>
+            <span class="label">Any</span>
+            <span id="anyCredits">0</span>
+          </div>
+
+          <div class="credit-item">
+            <span class="credit-icon">✨</span>
+            <span class="label">Healing</span>
+            <span id="healingCredits">0</span>
+          </div>
+
+          <div class="credit-item">
+            <span class="credit-icon">🎧</span>
+            <span class="label">Coaching</span>
+            <span id="coachingCredits">0</span>
+          </div>
+
+          <h3 class="subheading">Active Plan</h3>
+          <p id="activePlan">None</p>
+
+          <h3 class="subheading">Purchased Bundles</h3>
+          <ul id="bundleList" class="item-list"></ul>
 
           <button id="buyCreditsBtn" class="btn btn-secondary">Buy More Credits</button>
         </div>
 
         <!-- Downloads -->
         <div class="card" id="section-downloads">
-          <h2>Downloads</h2>
+          <h2>⬇️ Downloads</h2>
           <ul id="downloadsList" class="item-list"></ul>
           <p class="small-text">These are resources your instructor has shared with you.</p>
         </div>
@@ -126,9 +136,9 @@
 
         <!-- Uploads -->
         <div class="card" id="section-uploads">
-          <h2>Uploads</h2>
+          <h2>⬆️ Uploads</h2>
           <form id="uploadForm" class="upload-form">
-            <input type="file" id="uploadFile" />
+            <input type="file" id="uploadFile">
             <button type="submit" class="btn">Upload File</button>
           </form>
           <ul id="uploadsList" class="item-list"></ul>
@@ -136,13 +146,13 @@
 
         <!-- Referrals -->
         <div class="card" id="section-referrals">
-          <h2>Referrals & Sharing</h2>
+          <h2>🔗 Referrals & Sharing</h2>
+
           <p class="label">Your referral link:</p>
           <div class="referral-row">
             <input type="text" id="referralLink" readonly>
             <button id="copyReferralBtn" class="btn btn-secondary">Copy</button>
           </div>
-          <p class="small-text">Share with friends and earn rewards and badges.</p>
 
           <h3 class="subheading">Referral Badges</h3>
           <ul id="referralBadgesList" class="badge-list"></ul>
@@ -150,7 +160,7 @@
 
         <!-- Achievements -->
         <div class="card" id="section-achievements">
-          <h2>Achievement Badges</h2>
+          <h2>🏆 Achievement Badges</h2>
           <ul id="achievementBadgesList" class="badge-list"></ul>
         </div>
 
@@ -161,18 +171,19 @@
 
         <!-- Sessions -->
         <div class="card" id="section-sessions">
-          <h2>Lessons & Sessions</h2>
-          <p class="small-text">Connect to your online lesson platform.</p>
+          <h2>🎥 Lessons & Sessions</h2>
 
           <div class="session-links">
             <div class="session-option">
               <span class="session-label">Calendly link</span>
               <input type="url" id="calendlyLink" placeholder="https://calendly.com/your-link">
             </div>
+
             <div class="session-option">
               <span class="session-label">Google Meet link</span>
               <input type="url" id="googleMeetLink" placeholder="https://meet.google.com/...">
             </div>
+
             <div class="session-option">
               <span class="session-label">Zoom link</span>
               <input type="url" id="zoomLink" placeholder="https://zoom.us/j/...">
@@ -190,16 +201,16 @@
 
         <!-- Instructor Notes -->
         <div class="card" id="section-instructor-notes">
-          <h2>Instructor Notes</h2>
+          <h2>🧑‍🏫 Instructor Notes</h2>
           <div id="instructorNotes" class="notes-box"></div>
         </div>
 
         <!-- Student Notes -->
         <div class="card" id="section-student-notes">
-          <h2>Your Notes</h2>
+          <h2>✏️ Your Notes</h2>
           <textarea id="studentNotesInput" placeholder="Write notes for yourself..."></textarea>
           <button id="saveNotesBtn" class="btn">Save Notes</button>
-          <p class="small-text" id="notesStatus"></p>
+          <p id="notesStatus" class="small-text"></p>
         </div>
 
       </section>
@@ -208,6 +219,7 @@
   </div>
 
   <!-- JS -->
-  <script src="student-dashboard.js"></script>
+  <script src="routes/badges.js"></script>
+  <script src="dashboard.js"></script>
 </body>
 </html>
