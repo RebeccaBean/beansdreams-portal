@@ -1,37 +1,33 @@
-// backend/models/BadgeProgress.js
-const { DataTypes } = require("sequelize");
-const db = require("../db");
+// backend/model/BadgeProgress.js
+module.exports = (sequelize, DataTypes) => {
+  const BadgeProgress = sequelize.define("BadgeProgress", {
+    id: {
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
+      primaryKey: true
+    },
 
-const BadgeProgress = db.sequelize.define("BadgeProgress", {
-  id: {
-    type: DataTypes.UUID,
-    defaultValue: DataTypes.UUIDV4,
-    primaryKey: true
-  },
+    uid: {
+      type: DataTypes.UUID,
+      allowNull: false,
+      unique: true
+    },
 
-  uid: {
-    type: DataTypes.UUID,
-    allowNull: false,
-    unique: true
-  },
+    progress: {
+      type: DataTypes.JSONB,
+      defaultValue: {}
+    },
 
-  // Stores badge progress as a JSON object
-  progress: {
-    type: DataTypes.JSONB,
-    defaultValue: {}
-  },
+    earnedBadges: {
+      type: DataTypes.ARRAY(DataTypes.STRING),
+      defaultValue: []
+    },
 
-  // List of earned badge keys
-  earnedBadges: {
-    type: DataTypes.ARRAY(DataTypes.STRING),
-    defaultValue: []
-  },
+    unlockedCodes: {
+      type: DataTypes.ARRAY(DataTypes.STRING),
+      defaultValue: []
+    }
+  });
 
-  // List of unlocked reward codes
-  unlockedCodes: {
-    type: DataTypes.ARRAY(DataTypes.STRING),
-    defaultValue: []
-  }
-});
-
-module.exports = BadgeProgress;
+  return BadgeProgress;
+};

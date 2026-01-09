@@ -1,7 +1,12 @@
 // backend/controllers/badgesController.js
-const BadgeProgress = require("../models/BadgeProgress");
+
+// Load Sequelize model from db.js (factory pattern)
+const { badgeProgress: BadgeProgress } = require("../db");
+
+// Load badge definitions (achievement + referral)
 const { achievementBadges, referralBadges } = require("../badges/badgeDefinitions");
 
+// Combine all badges into one list
 const allBadges = [...achievementBadges, ...referralBadges];
 
 // Group badges by progressKey for fast lookup
@@ -11,7 +16,9 @@ const badgesByProgressKey = allBadges.reduce((acc, badge) => {
   return acc;
 }, {});
 
+// ===============================
 // GET /students/:uid/badges
+// ===============================
 exports.getBadges = async (req, res) => {
   try {
     const { uid } = req.params;
@@ -35,7 +42,9 @@ exports.getBadges = async (req, res) => {
   }
 };
 
+// ===============================
 // POST /students/:uid/badges/update
+// ===============================
 exports.updateBadgeProgress = async (req, res) => {
   try {
     const { uid } = req.params;
@@ -103,4 +112,39 @@ exports.updateBadgeProgress = async (req, res) => {
     console.error("updateBadgeProgress error:", err);
     res.status(500).json({ error: "Failed to update badge progress" });
   }
+};
+
+exports.updateBadgeProgressInternal = async (uid, progressKey, increment = 1) => {
+  let badgeDoc = await BadgeProgress.findOne({ where: { uid } });
+
+  if (!badgeDoc) {
+    badgeDoc = await BadgeProgress.create({ uid });
+  }
+
+  const progress = badgeDoc.progress || {};
+  const currentValue = progress[progressKey] || 0;
+  const newValue = currentValue + increment;
+
+  progress[progressKey] = newValue;
+
+  const earned = new Set(badgeDoc.earnedBadges || []);
+  const unlocked = new Set(badgeDoc.unlockedCodes || []);
+
+  const affectedBadges = badgesByProgressKey[progressKey] || [];
+
+  for (const badge of affectedBadges) {
+    const target = badge.maxProgress;
+    const isEarned = target === "all" ? newValue >= 1 : newValue >= target;
+
+    if (isEarned && !earned.has(badge.name)) {
+      earned.add(badge.name);
+      if (badge.rewardCode) unlocked.add(badge.rewardCode);
+    }
+  }
+
+  await badgeDoc.update({
+    progress,
+    earnedBadges: Array.from(earned),
+    unlockedCodes: Array.from(unlocked)
+  });
 };

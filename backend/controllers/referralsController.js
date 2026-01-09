@@ -1,16 +1,28 @@
 // backend/controllers/referralsController.js
+
 const referralService = require("../services/referralService");
+const { updateBadgeProgressInternal } = require("./badgesController");
 
 exports.createReferral = async (req, res) => {
   try {
-    const referrerUid = req.user.uid;
-    const { email } = req.body;
+    const referrerUid = req.user?.uid || null;
+    const { email, referralCode } = req.body;
 
-    const referral = await referralService.createReferral(referrerUid, email);
+    // Track share (for badges)
+    if (referrerUid) {
+      await updateBadgeProgressInternal(referrerUid, "shares", 1);
+    }
+
+    const referral = await referralService.createReferral({
+      referrerUid,
+      email,
+      referralCode
+    });
+
     res.json({ success: true, referral });
   } catch (err) {
     console.error("Create referral error:", err);
-    res.status(500).json({ error: "Failed to create referral" });
+    res.status(400).json({ error: err.message || "Failed to create referral" });
   }
 };
 

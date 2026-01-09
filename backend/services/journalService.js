@@ -1,15 +1,5 @@
 // backend/services/journalService.js
-const { emit } = require("./badgeEventService");
-
-async function submitJournal(uid, content) {
-  await Journal.create({ uid, content });
-
-  await emit(uid, "journal_submitted");
-
-  return { success: true };
-}
-// backend/services/journalService.js
-const JournalEntry = require("../models/JournalEntry");
+const JournalEntry = require("../model/JournalEntry");
 const { emit } = require("./badgeEventService");
 
 /**

@@ -1,5 +1,5 @@
 // backend/services/badgeService.js
-const BadgeProgress = require("../models/BadgeProgress");
+const BadgeProgress = require("../model/BadgeProgress");
 const badgeDefinitions = require("../badges/badgeDefinitions");
 
 exports.updateBadgeProgressInternal = async (uid, progressKey, increment = 1) => {

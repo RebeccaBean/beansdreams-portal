@@ -1,23 +1,10 @@
 // backend/db.js
 const { Sequelize, DataTypes } = require("sequelize");
 const dotenv = require("dotenv");
-
-// Core models
-const BadgeProgress = require("./models/BadgeProgress");
-const ClassCompletion = require("./models/ClassCompletion");
-const Upload = require("./models/Upload");
-const User = require("./models/User");
-
-// Badge-related models
-const JournalEntry = require("./models/JournalEntry");
-const ReflectionEntry = require("./models/ReflectionEntry");
-const Streak = require("./models/Streak");
-const CoachingSession = require("./models/CoachingSession");
-
 dotenv.config();
 
 /* ---------------------------
-   Initialize Sequelize
+   Initialize Sequelize FIRST
 --------------------------- */
 const sequelize = new Sequelize(
   process.env.DB_NAME,
@@ -31,163 +18,232 @@ const sequelize = new Sequelize(
 );
 
 /* ---------------------------
+   Load Models (Factory Pattern)
+--------------------------- */
+const BadgeProgress = require("./model/BadgeProgress")(sequelize, DataTypes);
+const ClassCompletion = require("./model/ClassCompletion")(sequelize, DataTypes);
+const Upload = require("./model/Upload")(sequelize, DataTypes);
+const User = require("./model/Students")(sequelize, DataTypes);
+const JournalEntry = require("./model/JournalEntry")(sequelize, DataTypes);
+const ReflectionEntry = require("./model/ReflectionEntry")(sequelize, DataTypes);
+const Streak = require("./model/Streak")(sequelize, DataTypes);
+const CoachingSession = require("./model/CoachingSession")(sequelize, DataTypes);
+const Referral = require("./model/Referral")(sequelize, DataTypes);
+const Notification = require("./model/Notification")(sequelize, DataTypes);
+
+/* ---------------------------
    STUDENT MODEL
 --------------------------- */
-const Student = sequelize.define("Student", {
-  id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
-  name: { type: DataTypes.STRING },
-  email: { type: DataTypes.STRING, unique: true },
-  password: { type: DataTypes.STRING, allowNull: false },
-  role: {
-    type: DataTypes.ENUM("student", "admin", "teacher"),
-    defaultValue: "student",
-  },
+const Student = sequelize.define(
+  "Student",
+  {
+    id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
+    name: { type: DataTypes.STRING },
+    email: { type: DataTypes.STRING, unique: true },
+    password: { type: DataTypes.STRING, allowNull: false },
+    role: {
+      type: DataTypes.ENUM("student", "admin", "teacher"),
+      defaultValue: "student",
+    },
 
-  // Legacy fields
-  credits: { type: DataTypes.INTEGER, defaultValue: 0 },
-  remainingCredits: {
-    type: DataTypes.JSONB,
-    defaultValue: { total: 0, byType: {} },
-  },
-  paymentHistory: { type: DataTypes.JSONB, defaultValue: [] },
-  subscriptions: { type: DataTypes.JSONB, defaultValue: [] },
-  downloads: { type: DataTypes.ARRAY(DataTypes.STRING), defaultValue: [] },
+    credits: { type: DataTypes.INTEGER, defaultValue: 0 },
+    remainingCredits: {
+      type: DataTypes.JSONB,
+      defaultValue: { total: 0, byType: {} },
+    },
+    paymentHistory: { type: DataTypes.JSONB, defaultValue: [] },
+    subscriptions: { type: DataTypes.JSONB, defaultValue: [] },
+    downloads: { type: DataTypes.ARRAY(DataTypes.STRING), defaultValue: [] },
 
-  reset_token: { type: DataTypes.STRING },
-  reset_token_expiry: { type: DataTypes.DATE },
-});
+    reset_token: { type: DataTypes.STRING },
+    reset_token_expiry: { type: DataTypes.DATE },
+  },
+  { freezeTableName: true }
+);
 
 /* ---------------------------
    ORDER MODELS
 --------------------------- */
-const Order = sequelize.define("Order", {
-  id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
-  studentId: { type: DataTypes.UUID },
-  email: { type: DataTypes.STRING },
-  status: { type: DataTypes.STRING, defaultValue: "pending" },
-  cart: { type: DataTypes.JSONB },
-  paypalOrder: { type: DataTypes.JSONB },
-  totalAmount: { type: DataTypes.FLOAT },
-  mergedFromPending: { type: DataTypes.BOOLEAN, defaultValue: false },
-  printifyData: { type: DataTypes.JSONB },
-  createdAt: { type: DataTypes.DATE, defaultValue: Sequelize.NOW },
-});
+const Order = sequelize.define(
+  "Order",
+  {
+    id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
+    studentId: { type: DataTypes.UUID },
+    email: { type: DataTypes.STRING },
+    status: { type: DataTypes.STRING, defaultValue: "pending" },
+    cart: { type: DataTypes.JSONB },
+    paypalOrder: { type: DataTypes.JSONB },
+    totalAmount: { type: DataTypes.FLOAT },
+    mergedFromPending: { type: DataTypes.BOOLEAN, defaultValue: false },
+    printifyData: { type: DataTypes.JSONB },
+    createdAt: { type: DataTypes.DATE, defaultValue: Sequelize.NOW },
+  },
+  { freezeTableName: true }
+);
 
-const OrderItem = sequelize.define("OrderItem", {
-  id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
-  orderId: { type: DataTypes.UUID, allowNull: false },
-  itemType: { type: DataTypes.STRING },
-  bundleKey: { type: DataTypes.STRING },
-  productId: { type: DataTypes.STRING },
-  quantity: { type: DataTypes.INTEGER, defaultValue: 1 },
-  meta: { type: DataTypes.JSONB },
-});
+const OrderItem = sequelize.define(
+  "OrderItem",
+  {
+    id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
+    orderId: { type: DataTypes.UUID, allowNull: false },
+    itemType: { type: DataTypes.STRING },
+    bundleKey: { type: DataTypes.STRING },
+    productId: { type: DataTypes.STRING },
+    quantity: { type: DataTypes.INTEGER, defaultValue: 1 },
+    meta: { type: DataTypes.JSONB },
+  },
+  { freezeTableName: true }
+);
 
-const PendingOrder = sequelize.define("PendingOrder", {
-  id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
-  email: { type: DataTypes.STRING, allowNull: false },
-  order: { type: DataTypes.JSONB, allowNull: false },
-  createdAt: { type: DataTypes.DATE, defaultValue: Sequelize.NOW },
-});
+const PendingOrder = sequelize.define(
+  "PendingOrder",
+  {
+    id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
+    email: { type: DataTypes.STRING, allowNull: false },
+    order: { type: DataTypes.JSONB, allowNull: false },
+    createdAt: { type: DataTypes.DATE, defaultValue: Sequelize.NOW },
+  },
+  { freezeTableName: true }
+);
 
 /* ---------------------------
    CREDIT MODELS
 --------------------------- */
-const CreditTransaction = sequelize.define("CreditTransaction", {
-  id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
-  studentId: { type: DataTypes.UUID },
-  delta: { type: DataTypes.INTEGER, allowNull: false },
-  typeBreakdown: { type: DataTypes.JSONB, defaultValue: {} },
-  source: { type: DataTypes.STRING },
-  orderId: { type: DataTypes.UUID },
-  meta: { type: DataTypes.JSONB },
-  createdAt: { type: DataTypes.DATE, defaultValue: Sequelize.NOW },
-});
+const CreditTransaction = sequelize.define(
+  "CreditTransaction",
+  {
+    id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
+    studentId: { type: DataTypes.UUID },
+    delta: { type: DataTypes.INTEGER, allowNull: false },
+    typeBreakdown: { type: DataTypes.JSONB, defaultValue: {} },
+    source: { type: DataTypes.STRING },
+    orderId: { type: DataTypes.UUID },
+    meta: { type: DataTypes.JSONB },
+    createdAt: { type: DataTypes.DATE, defaultValue: Sequelize.NOW },
+  },
+  { freezeTableName: true }
+);
 
-const PendingCredit = sequelize.define("PendingCredit", {
-  id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
-  email: { type: DataTypes.STRING, allowNull: false },
-  delta: { type: DataTypes.INTEGER, allowNull: false },
-  typeBreakdown: { type: DataTypes.JSONB, defaultValue: {} },
-  meta: { type: DataTypes.JSONB, defaultValue: {} },
-  createdAt: { type: DataTypes.DATE, defaultValue: Sequelize.NOW },
-});
+const PendingCredit = sequelize.define(
+  "PendingCredit",
+  {
+    id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
+    email: { type: DataTypes.STRING, allowNull: false },
+    delta: { type: DataTypes.INTEGER, allowNull: false },
+    typeBreakdown: { type: DataTypes.JSONB, defaultValue: {} },
+    meta: { type: DataTypes.JSONB, defaultValue: {} },
+    createdAt: { type: DataTypes.DATE, defaultValue: Sequelize.NOW },
+  },
+  { freezeTableName: true }
+);
 
 /* ---------------------------
    DOWNLOAD MODELS
 --------------------------- */
-const Download = sequelize.define("Download", {
-  id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
-  studentId: { type: DataTypes.UUID },
-  productId: { type: DataTypes.STRING, allowNull: false },
-  grantedAt: { type: DataTypes.DATE, defaultValue: Sequelize.NOW },
-});
+const Download = sequelize.define(
+  "Download",
+  {
+    id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
+    studentId: { type: DataTypes.UUID },
+    productId: { type: DataTypes.STRING, allowNull: false },
+    grantedAt: { type: DataTypes.DATE, defaultValue: Sequelize.NOW },
+  },
+  { freezeTableName: true }
+);
 
-const PendingDownload = sequelize.define("PendingDownload", {
-  id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
-  email: { type: DataTypes.STRING, allowNull: false },
-  productId: { type: DataTypes.STRING, allowNull: false },
-  meta: { type: DataTypes.JSONB, defaultValue: {} },
-  createdAt: { type: DataTypes.DATE, defaultValue: Sequelize.NOW },
-});
+const PendingDownload = sequelize.define(
+  "PendingDownload",
+  {
+    id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
+    email: { type: DataTypes.STRING, allowNull: false },
+    productId: { type: DataTypes.STRING, allowNull: false },
+    meta: { type: DataTypes.JSONB, defaultValue: {} },
+    createdAt: { type: DataTypes.DATE, defaultValue: Sequelize.NOW },
+  },
+  { freezeTableName: true }
+);
 
 /* ---------------------------
    SUBSCRIPTIONS
 --------------------------- */
-const Subscription = sequelize.define("Subscription", {
-  id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
-  studentId: { type: DataTypes.UUID },
-  planType: { type: DataTypes.STRING },
-  paypalSubscriptionId: { type: DataTypes.STRING },
-  status: { type: DataTypes.STRING, defaultValue: "created" },
-  createdAt: { type: DataTypes.DATE, defaultValue: Sequelize.NOW },
-  updatedAt: { type: DataTypes.DATE, defaultValue: Sequelize.NOW },
-});
+const Subscription = sequelize.define(
+  "Subscription",
+  {
+    id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
+    studentId: { type: DataTypes.UUID },
+    planType: { type: DataTypes.STRING },
+    paypalSubscriptionId: { type: DataTypes.STRING },
+    status: { type: DataTypes.STRING, defaultValue: "created" },
+    createdAt: { type: DataTypes.DATE, defaultValue: Sequelize.NOW },
+    updatedAt: { type: DataTypes.DATE, defaultValue: Sequelize.NOW },
+  },
+  { freezeTableName: true }
+);
 
-const PendingSubscription = sequelize.define("PendingSubscription", {
-  id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
-  email: { type: DataTypes.STRING, allowNull: false },
-  planType: { type: DataTypes.STRING, allowNull: false },
-  paypalSubscriptionId: { type: DataTypes.STRING, allowNull: false },
-  status: { type: DataTypes.STRING, defaultValue: "created" },
-  meta: { type: DataTypes.JSONB, defaultValue: {} },
-  createdAt: { type: DataTypes.DATE, defaultValue: Sequelize.NOW },
-});
+const PendingSubscription = sequelize.define(
+  "PendingSubscription",
+  {
+    id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
+    email: { type: DataTypes.STRING, allowNull: false },
+    planType: { type: DataTypes.STRING, allowNull: false },
+    paypalSubscriptionId: { type: DataTypes.STRING, allowNull: false },
+    status: { type: DataTypes.STRING, defaultValue: "created" },
+    meta: { type: DataTypes.JSONB, defaultValue: {} },
+    createdAt: { type: DataTypes.DATE, defaultValue: Sequelize.NOW },
+  },
+  { freezeTableName: true }
+);
 
 /* ---------------------------
    SINGLE CLASS PURCHASE
 --------------------------- */
-const SingleClassPurchase = sequelize.define("SingleClassPurchase", {
-  id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
-  studentId: { type: DataTypes.UUID },
-  email: { type: DataTypes.STRING },
-  classType: { type: DataTypes.STRING },
-  status: { type: DataTypes.STRING, defaultValue: "created" },
-  createdAt: { type: DataTypes.DATE, defaultValue: Sequelize.NOW },
-});
+const SingleClassPurchase = sequelize.define(
+  "SingleClassPurchase",
+  {
+    id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
+    studentId: { type: DataTypes.UUID },
+    email: { type: DataTypes.STRING },
+    classType: { type: DataTypes.STRING },
+    status: { type: DataTypes.STRING, defaultValue: "created" },
+    createdAt: { type: DataTypes.DATE, defaultValue: Sequelize.NOW },
+  },
+  { freezeTableName: true }
+);
 
 /* ---------------------------
    WEBHOOK LOGS
 --------------------------- */
-const PayPalWebhook = sequelize.define("PayPalWebhook", {
-  id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
-  body: { type: DataTypes.JSONB },
-  receivedAt: { type: DataTypes.DATE, defaultValue: Sequelize.NOW },
-});
+const PayPalWebhook = sequelize.define(
+  "PayPalWebhook",
+  {
+    id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
+    body: { type: DataTypes.JSONB },
+    receivedAt: { type: DataTypes.DATE, defaultValue: Sequelize.NOW },
+  },
+  { freezeTableName: true }
+);
 
-const PrintifyEvent = sequelize.define("PrintifyEvent", {
-  id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
-  event: { type: DataTypes.JSONB },
-  receivedAt: { type: DataTypes.DATE, defaultValue: Sequelize.NOW },
-});
+const PrintifyEvent = sequelize.define(
+  "PrintifyEvent",
+  {
+    id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
+    event: { type: DataTypes.JSONB },
+    receivedAt: { type: DataTypes.DATE, defaultValue: Sequelize.NOW },
+  },
+  { freezeTableName: true }
+);
 
-const CalendlyEvent = sequelize.define("CalendlyEvent", {
-  id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
-  event: { type: DataTypes.JSONB },
-  email: { type: DataTypes.STRING },
-  studentId: { type: DataTypes.UUID },
-  receivedAt: { type: DataTypes.DATE, defaultValue: Sequelize.NOW },
-});
+const CalendlyEvent = sequelize.define(
+  "CalendlyEvent",
+  {
+    id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
+    event: { type: DataTypes.JSONB },
+    email: { type: DataTypes.STRING },
+    studentId: { type: DataTypes.UUID },
+    receivedAt: { type: DataTypes.DATE, defaultValue: Sequelize.NOW },
+  },
+  { freezeTableName: true }
+);
 
 /* ---------------------------
    ASSOCIATIONS
@@ -225,27 +281,21 @@ CalendlyEvent.belongsTo(Student, { foreignKey: "studentId" });
    BADGE SYSTEM ASSOCIATIONS
 --------------------------- */
 
-// Student → Class Completions
 Student.hasMany(ClassCompletion, { foreignKey: "uid", sourceKey: "id" });
 ClassCompletion.belongsTo(Student, { foreignKey: "uid", targetKey: "id" });
 
-// Student → Uploads
 Student.hasMany(Upload, { foreignKey: "uid", sourceKey: "id" });
 Upload.belongsTo(Student, { foreignKey: "uid", targetKey: "id" });
 
-// Student → Journals
 Student.hasMany(JournalEntry, { foreignKey: "uid", sourceKey: "id" });
 JournalEntry.belongsTo(Student, { foreignKey: "uid", targetKey: "id" });
 
-// Student → Reflections
 Student.hasMany(ReflectionEntry, { foreignKey: "uid", sourceKey: "id" });
 ReflectionEntry.belongsTo(Student, { foreignKey: "uid", targetKey: "id" });
 
-// Student → Coaching Sessions
 Student.hasMany(CoachingSession, { foreignKey: "uid", sourceKey: "id" });
 CoachingSession.belongsTo(Student, { foreignKey: "uid", targetKey: "id" });
 
-// Student → Streak
 Student.hasOne(Streak, { foreignKey: "uid", sourceKey: "id" });
 Streak.belongsTo(Student, { foreignKey: "uid", targetKey: "id" });
 
@@ -287,7 +337,6 @@ module.exports = {
   pendingOrders: PendingOrder,
   pendingSubscriptions: PendingSubscription,
 
-  // Badge system models
   badgeProgress: BadgeProgress,
   classCompletions: ClassCompletion,
   uploads: Upload,
@@ -295,4 +344,6 @@ module.exports = {
   reflectionEntries: ReflectionEntry,
   streaks: Streak,
   coachingSessions: CoachingSession,
+  referrals: Referral,
+  notifications: Notification,
 };

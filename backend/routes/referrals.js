@@ -1,11 +1,11 @@
-// backend/routes/referrals.js
+// backend/routes/referralWebhooks.js
 const express = require("express");
 const router = express.Router();
-const { requireAuth } = require("../middleware/auth");
 const referralsController = require("../controllers/referralsController");
+const verifyWebhookSecret = require("../middleware/verifyWebhookSecret");
 
-router.post("/", requireAuth, referralsController.createReferral);
-router.post("/signed-up", referralsController.markSignedUp);
-router.post("/completed", referralsController.markCompleted);
+// Secure server-to-server webhook endpoints
+router.post("/signed-up", verifyWebhookSecret, referralsController.markSignedUp);
+router.post("/completed", verifyWebhookSecret, referralsController.markCompleted);
 
 module.exports = router;

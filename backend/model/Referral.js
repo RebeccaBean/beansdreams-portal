@@ -1,28 +1,69 @@
-// backend/models/Referral.js
-const { DataTypes } = require("sequelize");
-const db = require("../db");
+// backend/model/Referral.js
 
-const Referral = db.sequelize.define("Referral", {
-  id: {
-    type: DataTypes.UUID,
-    defaultValue: DataTypes.UUIDV4,
-    primaryKey: true
-  },
+module.exports = (sequelize, DataTypes) => {
+  const Referral = sequelize.define(
+    "Referral",
+    {
+      id: {
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
+        primaryKey: true
+      },
 
-  referrerUid: {
-    type: DataTypes.UUID,
-    allowNull: false
-  },
+      referrerUid: {
+        type: DataTypes.UUID,
+        allowNull: false
+      },
 
-  referredEmail: {
-    type: DataTypes.STRING,
-    allowNull: false
-  },
+      referredEmail: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true, // Prevent duplicate referrals
+        validate: {
+          isEmail: true
+        }
+      },
 
-  status: {
-    type: DataTypes.ENUM("pending", "signed_up", "completed"),
-    defaultValue: "pending"
-  }
-});
+      referralCode: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        unique: true // Ensures referral codes are unique
+      },
 
-module.exports = Referral;
+      status: {
+        type: DataTypes.ENUM("pending", "signed_up", "completed"),
+        allowNull: false,
+        defaultValue: "pending"
+      },
+
+      metadata: {
+        type: DataTypes.JSONB,
+        allowNull: true
+      }
+    },
+    {
+      timestamps: true,
+
+      indexes: [
+        // Rate limiting: fast lookup of referrals created recently
+        {
+          fields: ["referrerUid", "createdAt"]
+        },
+
+        // Fast lookup for referral code validation
+        {
+          unique: true,
+          fields: ["referralCode"]
+        },
+
+        // Prevent duplicate referrals by email
+        {
+          unique: true,
+          fields: ["referredEmail"]
+        }
+      ]
+    }
+  );
+
+  return Referral;
+};
