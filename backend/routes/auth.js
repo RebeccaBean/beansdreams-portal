@@ -180,4 +180,15 @@ router.post("/reset-password", async (req, res) => {
   }
 });
 
+// GET /api/auth/me
+router.get("/me", requireAuth, async (req, res) => {
+  res.json({
+    id: req.user.id,
+    email: req.user.email,
+    name: req.user.name,
+    role: req.user.role
+  });
+});
+
+
 module.exports = router;
