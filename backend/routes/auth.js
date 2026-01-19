@@ -12,6 +12,7 @@ const {
 } = require("../utils/emailTemplates");
 
 const { syncPendingForStudent } = require("../utils/syncPending");
+const { requireAuth } = require("../middleware/auth");
 
 const router = express.Router();
 
