@@ -1,16 +1,18 @@
 // backend/routes/credits.js
 const express = require("express");
 const db = require("../db");
+
 const { syncPendingForStudent } = require("../utils/syncPending");
+const { applyCredits } = require("../utils/applyCredits");
+const { deductCredits } = require("../utils/deductCredits");
 
 const router = express.Router();
 
-/**
- * POST /students/:uid/credits
- * Apply credit changes (positive or negative).
- * If student does NOT exist → store as pending credit.
- * If student exists → sync pending + apply credit.
- */
+/* ---------------------------------------------------------
+   POST /students/:uid/credits
+   Apply credit changes (positive or negative)
+   Uses applyCredits() and deductCredits()
+--------------------------------------------------------- */
 router.post("/students/:uid/credits", async (req, res) => {
   try {
     const { uid } = req.params;
@@ -39,10 +41,18 @@ router.post("/students/:uid/credits", async (req, res) => {
       });
     }
 
-    // Sync ALL pending data before applying new credit
+    // Sync pending credits/subscriptions before applying new credit
     await syncPendingForStudent(student);
 
-    // Apply credit transaction
+    // Apply or deduct credits
+    let newTotal;
+    if (credits >= 0) {
+      newTotal = await applyCredits(uid, credits, type || {}, meta || {});
+    } else {
+      newTotal = await deductCredits(uid, Math.abs(credits), type || null, meta || {});
+    }
+
+    // Log the transaction in SQL creditTransactions
     await db.creditTransactions.create({
       studentId: uid,
       delta: credits,
@@ -52,7 +62,7 @@ router.post("/students/:uid/credits", async (req, res) => {
       meta: meta || {}
     });
 
-    // Recalculate totals
+    // Recalculate totals from all transactions
     const allTx = await db.creditTransactions.findAll({
       where: { studentId: uid }
     });
@@ -78,11 +88,11 @@ router.post("/students/:uid/credits", async (req, res) => {
   }
 });
 
-/**
- * GET /students/:uid/credits
- * Returns credit summary + history.
- * Automatically syncs pending data.
- */
+/* ---------------------------------------------------------
+   GET /students/:uid/credits
+   Returns credit summary + history
+   Uses SQL creditTransactions + syncPending
+--------------------------------------------------------- */
 router.get("/students/:uid/credits", async (req, res) => {
   try {
     const { uid } = req.params;
@@ -92,7 +102,7 @@ router.get("/students/:uid/credits", async (req, res) => {
       return res.status(404).json({ error: "Student not found" });
     }
 
-    // Sync ALL pending data before returning credit info
+    // Sync pending credits/subscriptions before returning data
     await syncPendingForStudent(student);
 
     const tx = await db.creditTransactions.findAll({

@@ -151,12 +151,237 @@ function subscriptionRenewalEmail({
   </html>`;
 }
 
+function subscriptionActivatedEmail({
+  brand,
+  firstName,
+  subscriptionName,
+  dashboardUrl,
+  supportEmail,
+  logoUrl,
+  websiteUrl
+}) {
+  const year = new Date().getFullYear();
+  return `
+  <!DOCTYPE html>
+  <html lang="en">
+  <head><meta charset="UTF-8" /><title>Your ${brand} subscription is active</title></head>
+  <body style="margin:0;padding:0;background:#FFF5EA;font-family:Arial,sans-serif;color:#111827;">
+    <table style="max-width:640px;margin:0 auto;background:#fff;">
+
+      <tr>
+        <td style="padding:24px;text-align:center;background:#004AAA;color:#fff;">
+          <img src="${logoUrl}" style="max-width:160px;margin-bottom:8px;" />
+          <div style="font-size:18px;font-weight:600;">Subscription Activated</div>
+        </td>
+      </tr>
+
+      <tr>
+        <td style="padding:32px;">
+          <h1 style="color:#FD8100;">Hi ${firstName},</h1>
+          <p>Your <strong>${subscriptionName}</strong> subscription is now active.</p>
+
+          <div style="background:#FFEBD2;border-radius:12px;padding:20px;margin:16px 0;">
+            <p>You now have full access to your subscription benefits.</p>
+          </div>
+
+          <p>
+            <a href="${dashboardUrl}" style="display:inline-block;padding:12px 20px;border-radius:10px;background:#FEB803;color:#fff;text-decoration:none;font-weight:600;">
+              Go to Dashboard
+            </a>
+          </p>
+
+          <p style="font-size:14px;color:#6b7280;">
+            Need help? Contact <a href="mailto:${supportEmail}" style="color:#004AAA;">${supportEmail}</a>.
+          </p>
+        </td>
+      </tr>
+
+      <tr>
+        <td style="padding:24px;text-align:center;font-size:13px;color:#8b6d0c;">
+          © ${year} ${brand} · <a href="${websiteUrl}" style="color:#004AAA;">${websiteUrl}</a>
+        </td>
+      </tr>
+
+    </table>
+  </body>
+  </html>`;
+}
+function subscriptionCancelledEmail({
+  brand,
+  firstName,
+  subscriptionName,
+  endDate,
+  supportEmail,
+  logoUrl,
+  websiteUrl
+}) {
+  const year = new Date().getFullYear();
+  return `
+  <!DOCTYPE html>
+  <html lang="en">
+  <head><meta charset="UTF-8" /><title>Your ${brand} subscription has been cancelled</title></head>
+  <body style="margin:0;padding:0;background:#FFF5EA;font-family:Arial,sans-serif;color:#111827;">
+    <table style="max-width:640px;margin:0 auto;background:#fff;">
+
+      <tr>
+        <td style="padding:24px;text-align:center;background:#004AAA;color:#fff;">
+          <img src="${logoUrl}" style="max-width:160px;margin-bottom:8px;" />
+          <div style="font-size:18px;font-weight:600;">Subscription Cancelled</div>
+        </td>
+      </tr>
+
+      <tr>
+        <td style="padding:32px;">
+          <h1 style="color:#FD8100;">Hi ${firstName},</h1>
+          <p>Your <strong>${subscriptionName}</strong> subscription has been cancelled.</p>
+
+          <div style="background:#FFE0B3;border-radius:12px;padding:20px;margin:16px 0;">
+            <p>Your access will continue until <strong>${endDate}</strong>.</p>
+          </div>
+
+          <p style="font-size:14px;color:#6b7280;">
+            If this was a mistake or you’d like to reactivate, contact us at 
+            <a href="mailto:${supportEmail}" style="color:#004AAA;">${supportEmail}</a>.
+          </p>
+        </td>
+      </tr>
+
+      <tr>
+        <td style="padding:24px;text-align:center;font-size:13px;color:#8b6d0c;">
+          © ${year} ${brand} · <a href="${websiteUrl}" style="color:#004AAA;">${websiteUrl}</a>
+        </td>
+      </tr>
+
+    </table>
+  </body>
+  </html>`;
+}
+function subscriptionPaymentFailedEmail({
+  brand,
+  firstName,
+  subscriptionName,
+  retryDate,
+  supportEmail,
+  dashboardUrl,
+  logoUrl,
+  websiteUrl
+}) {
+  const year = new Date().getFullYear();
+  return `
+  <!DOCTYPE html>
+  <html lang="en">
+  <head><meta charset="UTF-8" /><title>Payment failed for your ${brand} subscription</title></head>
+  <body style="margin:0;padding:0;background:#FFF5EA;font-family:Arial,sans-serif;color:#111827;">
+    <table style="max-width:640px;margin:0 auto;background:#fff;">
+
+      <tr>
+        <td style="padding:24px;text-align:center;background:#004AAA;color:#fff;">
+          <img src="${logoUrl}" style="max-width:160px;margin-bottom:8px;" />
+          <div style="font-size:18px;font-weight:600;">Payment Failed</div>
+        </td>
+      </tr>
+
+      <tr>
+        <td style="padding:32px;">
+          <h1 style="color:#FD8100;">Hi ${firstName},</h1>
+          <p>We were unable to process your payment for <strong>${subscriptionName}</strong>.</p>
+
+          <div style="background:#FFE0B3;border-radius:12px;padding:20px;margin:16px 0;">
+            <p>We will retry the payment on <strong>${retryDate}</strong>.</p>
+          </div>
+
+          <p>Please update your billing details to avoid interruption.</p>
+
+          <p>
+            <a href="${dashboardUrl}" style="display:inline-block;padding:12px 20px;border-radius:10px;background:#FEB803;color:#fff;text-decoration:none;font-weight:600;">
+              Update Billing Info
+            </a>
+          </p>
+
+          <p style="font-size:14px;color:#6b7280;">
+            Need help? Contact <a href="mailto:${supportEmail}" style="color:#004AAA;">${supportEmail}</a>.
+          </p>
+        </td>
+      </tr>
+
+      <tr>
+        <td style="padding:24px;text-align:center;font-size:13px;color:#8b6d0c;">
+          © ${year} ${brand} · <a href="${websiteUrl}" style="color:#004AAA;">${websiteUrl}</a>
+        </td>
+      </tr>
+
+    </table>
+  </body>
+  </html>`;
+}
+function lowCreditsWarningEmail({
+  brand,
+  firstName,
+  remainingCredits,
+  dashboardUrl,
+  supportEmail,
+  logoUrl,
+  websiteUrl
+}) {
+  const year = new Date().getFullYear();
+  return `
+  <!DOCTYPE html>
+  <html lang="en">
+  <head><meta charset="UTF-8" /><title>Your ${brand} credits are running low</title></head>
+  <body style="margin:0;padding:0;background:#FFF5EA;font-family:Arial,sans-serif;color:#111827;">
+    <table style="max-width:640px;margin:0 auto;background:#fff;">
+
+      <tr>
+        <td style="padding:24px;text-align:center;background:#004AAA;color:#fff;">
+          <img src="${logoUrl}" style="max-width:160px;margin-bottom:8px;" />
+          <div style="font-size:18px;font-weight:600;">Low Credits Warning</div>
+        </td>
+      </tr>
+
+      <tr>
+        <td style="padding:32px;">
+          <h1 style="color:#FD8100;">Hi ${firstName},</h1>
+          <p>You’re running low on credits.</p>
+
+          <div style="background:#FFEBD2;border-radius:12px;padding:20px;margin:16px 0;">
+            <p><strong>Remaining Credits:</strong> ${remainingCredits}</p>
+          </div>
+
+          <p>You can purchase more credits or upgrade your subscription anytime.</p>
+
+          <p>
+            <a href="${dashboardUrl}" style="display:inline-block;padding:12px 20px;border-radius:10px;background:#FEB803;color:#fff;text-decoration:none;font-weight:600;">
+              Add More Credits
+            </a>
+          </p>
+
+          <p style="font-size:14px;color:#6b7280;">
+            Need help? Contact <a href="mailto:${supportEmail}" style="color:#004AAA;">${supportEmail}</a>.
+          </p>
+        </td>
+      </tr>
+
+      <tr>
+        <td style="padding:24px;text-align:center;font-size:13px;color:#8b6d0c;">
+          © ${year} ${brand} · <a href="${websiteUrl}" style="color:#004AAA;">${websiteUrl}</a>
+        </td>
+      </tr>
+
+    </table>
+  </body>
+  </html>`;
+}
+
 // Export all functions (CommonJS)
 module.exports = {
   welcomeEmail,
   purchaseEmail,
   resetPasswordEmail,
-  subscriptionRenewalEmail
+  subscriptionRenewalEmail,
+  subscriptionActivatedEmail,
+  subscriptionCancelledEmail,
+  subscriptionPaymentFailedEmail,
+  lowCreditsWarningEmail
 };
 
 // Class Booking Confirmation Email Template

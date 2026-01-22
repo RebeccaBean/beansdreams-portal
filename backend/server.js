@@ -39,7 +39,6 @@ function authorizeRoles(...roles) {
 // ===============================
 // Authenticated File Serving
 // ===============================
-// Example: GET /files/myphoto.png
 app.get("/files/:filename", authenticate, (req, res) => {
   const filePath = path.join(__dirname, "uploads", req.params.filename);
   res.sendFile(filePath, (err) => {
@@ -65,30 +64,50 @@ const reflectionsRoutes = require("./routes/reflections");
 const coachingRoutes = require("./routes/coaching");
 const streaksRoutes = require("./routes/streaks");
 const eventsRoutes = require("./routes/events");
-const paypalWebhooks = require("./routes/paypalWebhooks");
+const paypalWebhooks = require("./routes/paypal");
 const studentsRoutes = require("./routes/students");
 const notificationsRoutes = require("./routes/notifications");
 const adminRoutes = require("./routes/admin");
 const adminFilesRoutes = require("./routes/adminFiles");
 const adminAuthRoutes = require("./routes/adminAuth");
 const filesRoutes = require("./routes/files");
+const calendlyRoutes = require("./routes/calendly");
+const subscriptionsRoutes = require("./routes/subscriptions");
+const creditHistoryRoutes = require("./routes/creditHistory");
 
 const referralRoutes = require("./routes/referrals");
 const referralAnalyticsRoutes = require("./routes/referralAnalytics");
 const referralLeaderboardRoutes = require("./routes/referralLeaderboard");
 const referralWebhooksRoutes = require("./routes/referralWebhooks");
 
+app.use("/system", require("./routes/system"));
+
 // ===============================
-// Public Routes
+// Public Routes (NO AUTH)
 // ===============================
 app.use("/auth", authRoutes);
+
+// PayPal webhooks (no auth)
 app.use("/webhooks", paypalWebhooks);
+
+// Calendly webhooks (no auth)
+app.use("/api", calendlyRoutes);
+
+// Subscription status + renewal (no auth, called by PayPal server)
+app.use("/api", subscriptionsRoutes);
+
+// Public entry point for PayPal order creation (PayPal server → /orders/create)
+app.use("/orders", orderRoutes);
+
+// Referral webhooks (no auth)
+app.use("/api/referrals/webhooks", referralWebhooksRoutes);
 
 // ===============================
 // Authenticated User Routes
 // ===============================
 app.use("/orders", authenticate, orderRoutes);
 app.use("/api/credits", authenticate, creditsRoutes);
+app.use("/api/credit-history", authenticate, creditHistoryRoutes);
 app.use("/api/badges", authenticate, badgesRoutes);
 app.use("/api/classes", authenticate, classesRoutes);
 app.use("/api/email", authenticate, emailRoutes);
@@ -106,9 +125,7 @@ app.use("/files", authenticate, filesRoutes);
 // Referral System Routes
 // ===============================
 app.use("/api/referrals", authenticate, referralRoutes);
-app.use("/api/referrals/webhooks", referralWebhooksRoutes);
 
-// Admin‑only analytics
 app.use(
   "/api/referrals/analytics",
   authenticate,
@@ -116,7 +133,6 @@ app.use(
   referralAnalyticsRoutes
 );
 
-// Admin‑only leaderboard
 app.use(
   "/api/referrals/leaderboard",
   authenticate,

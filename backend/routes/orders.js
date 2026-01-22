@@ -1,15 +1,18 @@
 // backend/routes/orders.js
 const express = require("express");
 const db = require("../db");
+
 const { syncPendingForStudent } = require("../utils/syncPending");
+const { applyCredits } = require("../utils/applyCredits");
+const { sendEmail } = require("../utils/mailer");
+const { purchaseConfirmationEmail } = require("../utils/emailTemplates");
 
 const router = express.Router();
 
-/**
- * GET /students/:uid/orders
- * Returns all orders for a student.
- * Automatically syncs pending orders first.
- */
+/* ---------------------------------------------------------
+   GET /students/:uid/orders
+   Returns all orders for a student
+--------------------------------------------------------- */
 router.get("/students/:uid/orders", async (req, res) => {
   try {
     const { uid } = req.params;
@@ -19,7 +22,6 @@ router.get("/students/:uid/orders", async (req, res) => {
       return res.status(404).json({ error: "Student not found" });
     }
 
-    // Sync ALL pending data before returning orders
     await syncPendingForStudent(student);
 
     const orders = await db.orders.findAll({
@@ -35,12 +37,11 @@ router.get("/students/:uid/orders", async (req, res) => {
   }
 });
 
-/**
- * POST /orders/create
- * Called by the PayPal server after capture.
- * Creates an order + order items.
- * If student does NOT exist → store as pending order.
- */
+/* ---------------------------------------------------------
+   POST /orders/create
+   Called by PayPal server after capture
+   Creates order + applies credits + sends email
+--------------------------------------------------------- */
 router.post("/orders/create", async (req, res) => {
   try {
     const { uid, email, cart, paypalOrder, status } = req.body;
@@ -49,9 +50,11 @@ router.post("/orders/create", async (req, res) => {
       return res.status(400).json({ error: "Missing email or cart" });
     }
 
-    // If student does NOT exist → store as pending order
     const student = uid ? await db.students.findByPk(uid) : null;
 
+    /* ---------------------------------------------------------
+       Student NOT found → store as pending order
+    --------------------------------------------------------- */
     if (!student) {
       await db.pendingOrders.create({
         email,
@@ -70,7 +73,9 @@ router.post("/orders/create", async (req, res) => {
       });
     }
 
-    // Student exists → sync pending + create order
+    /* ---------------------------------------------------------
+       Student exists → sync pending + create order
+    --------------------------------------------------------- */
     await syncPendingForStudent(student);
 
     const order = await db.orders.create({
@@ -82,7 +87,9 @@ router.post("/orders/create", async (req, res) => {
       createdAt: new Date().toISOString()
     });
 
-    // Create order items
+    /* ---------------------------------------------------------
+       Create order items
+    --------------------------------------------------------- */
     for (const item of cart) {
       await db.orderItems.create({
         orderId: order.id,
@@ -94,17 +101,55 @@ router.post("/orders/create", async (req, res) => {
       });
     }
 
-    res.json({ success: true, order });
+    /* ---------------------------------------------------------
+       APPLY CREDITS (if the order contains credit bundles)
+    --------------------------------------------------------- */
+    let totalCreditsAdded = 0;
+
+    for (const item of cart) {
+      if (item.type === "credit_bundle") {
+        const credits = item.credits || 0;
+        const typeBreakdown = item.creditType ? { [item.creditType]: credits } : {};
+
+        if (credits > 0) {
+          await applyCredits(uid, credits, typeBreakdown, {
+            source: "order_purchase",
+            orderId: order.id
+          });
+
+          totalCreditsAdded += credits;
+        }
+      }
+    }
+
+    /* ---------------------------------------------------------
+       SEND PURCHASE CONFIRMATION EMAIL
+    --------------------------------------------------------- */
+    if (totalCreditsAdded > 0) {
+      const html = purchaseConfirmationEmail({
+        brand: "Bean's Dreams",
+        firstName: student.name.split(" ")[0],
+        creditsAdded: totalCreditsAdded,
+        dashboardUrl: "https://portal.beansdreams.org/dashboard",
+        supportEmail: "support@beansdreams.org",
+        logoUrl: "https://yourcdn.com/logo.png",
+        websiteUrl: "https://beansdreams.org"
+      });
+
+      await sendEmail(student.email, "Your credits have been added!", html);
+    }
+
+    res.json({ success: true, order, creditsAdded: totalCreditsAdded });
   } catch (err) {
     console.error("POST /orders/create error:", err);
     res.status(500).json({ error: "Server error" });
   }
 });
 
-/**
- * POST /orders/:orderId/printify
- * Stores Printify order data after PayPal server creates a merch order.
- */
+/* ---------------------------------------------------------
+   POST /orders/:orderId/printify
+   Stores Printify order data
+--------------------------------------------------------- */
 router.post("/orders/:orderId/printify", async (req, res) => {
   try {
     const { orderId } = req.params;
@@ -126,3 +171,4 @@ router.post("/orders/:orderId/printify", async (req, res) => {
 });
 
 module.exports = router;
+

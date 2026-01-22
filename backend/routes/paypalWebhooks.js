@@ -1,30 +1,16 @@
-// backend/routes/paypal.js
-const express = require("express");
-const router = express.Router();
-const db = require("../db");
-
-// Native fetch (Node 18+)
-const fetch = global.fetch;
-
-// Environment
-const PORTAL_API_URL = process.env.PORTAL_API_URL;
-
-/**
- * PayPal Webhook Receiver
- * NOTE: This endpoint must NOT use authentication middleware.
- */
 router.post("/paypal", async (req, res) => {
   try {
-    const event = req.body;
-
-    if (!event || !event.event_type) {
-      return res.status(400).json({ error: "Invalid webhook payload" });
+    // 1. Verify signature
+    const valid = await verifyPayPalSignature(req);
+    if (!valid) {
+      return res.status(400).json({ error: "Invalid PayPal signature" });
     }
 
+    const event = req.body;
     const eventType = event.event_type;
     const resource = event.resource;
 
-    // Prevent duplicate processing
+    // 2. Prevent duplicate processing
     const existing = await db.paypalWebhooks.findOne({
       where: { eventId: event.id }
     });
@@ -45,8 +31,7 @@ router.post("/paypal", async (req, res) => {
       null;
 
     /* -------------------------------------------------------
-       1️⃣ PAYMENT.CAPTURE.COMPLETED
-       → Create pending order
+       PAYMENT.CAPTURE.COMPLETED → Create pending order
     -------------------------------------------------------- */
     if (eventType === "PAYMENT.CAPTURE.COMPLETED") {
       const email =
@@ -69,20 +54,21 @@ router.post("/paypal", async (req, res) => {
         createdAt: new Date().toISOString()
       });
 
+      // Notify portal
+      await fetch(`${PORTAL_API_URL}/orders/complete`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId, email })
+      });
+
       return res.json({ success: true });
     }
 
     /* -------------------------------------------------------
-       2️⃣ SUBSCRIPTION EVENTS
-       Forward to portal subscription handlers
+       SUBSCRIPTION EVENTS
     -------------------------------------------------------- */
-
     const forward = async (endpoint, payload) => {
-      if (!PORTAL_API_URL) {
-        console.error("Missing PORTAL_API_URL");
-        return;
-      }
-
+      if (!PORTAL_API_URL) return;
       await fetch(`${PORTAL_API_URL}${endpoint}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -95,7 +81,6 @@ router.post("/paypal", async (req, res) => {
         paypalSubscriptionId: subscriptionId,
         status: "active"
       });
-      return res.json({ success: true });
     }
 
     if (eventType === "BILLING.SUBSCRIPTION.CANCELLED") {
@@ -103,7 +88,6 @@ router.post("/paypal", async (req, res) => {
         paypalSubscriptionId: subscriptionId,
         status: "cancelled"
       });
-      return res.json({ success: true });
     }
 
     if (eventType === "BILLING.SUBSCRIPTION.SUSPENDED") {
@@ -111,7 +95,6 @@ router.post("/paypal", async (req, res) => {
         paypalSubscriptionId: subscriptionId,
         status: "suspended"
       });
-      return res.json({ success: true });
     }
 
     if (eventType === "BILLING.SUBSCRIPTION.PAYMENT.FAILED") {
@@ -119,7 +102,6 @@ router.post("/paypal", async (req, res) => {
         paypalSubscriptionId: subscriptionId,
         status: "past_due"
       });
-      return res.json({ success: true });
     }
 
     if (
@@ -129,15 +111,11 @@ router.post("/paypal", async (req, res) => {
       await forward("/subscriptions/apply-renewal", {
         paypalSubscriptionId: subscriptionId
       });
-      return res.json({ success: true });
     }
 
-    // Default
-    res.json({ success: true });
+    return res.json({ success: true });
   } catch (err) {
     console.error("PayPal webhook error:", err);
     res.status(500).json({ error: "Server error" });
   }
 });
-
-module.exports = router;

@@ -1,4 +1,4 @@
-// backend/model/User.js
+// backend/model/Students.js
 module.exports = (sequelize, DataTypes) => {
   const User = sequelize.define("User", {
     id: {

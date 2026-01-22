@@ -1,9 +1,19 @@
 // backend/routes/subscriptions.js
 const express = require("express");
 const db = require("../db");
+
+// NEW email system
+const { sendEmail } = require("../utils/mailer");
+const {
+  subscriptionRenewalEmail,
+  subscriptionActivatedEmail,
+  subscriptionCancelledEmail,
+  subscriptionPaymentFailedEmail
+} = require("../utils/emailTemplates");
+
+// Existing utilities
 const { syncPendingForStudent } = require("../utils/syncPending");
 const { applyCredits } = require("../utils/applyCredits");
-const { sendPortalEmail } = require("../utils/sendPortalEmail");
 
 const router = express.Router();
 
@@ -17,16 +27,12 @@ router.post("/students/:uid/subscriptions", async (req, res) => {
     const { planType, paypalSubscriptionId, status, email } = req.body;
 
     if (!planType || !paypalSubscriptionId) {
-      return res
-        .status(400)
-        .json({ error: "Missing planType or paypalSubscriptionId" });
+      return res.status(400).json({ error: "Missing planType or paypalSubscriptionId" });
     }
 
-    // Check if student exists
     const student = await db.students.findByPk(uid);
 
     if (!student) {
-      // Store as pending subscription (pre‑signup)
       await db.pendingSubscriptions.create({
         email: email || null,
         planType,
@@ -42,10 +48,8 @@ router.post("/students/:uid/subscriptions", async (req, res) => {
       });
     }
 
-    // Sync pending data before creating subscription
     await syncPendingForStudent(student);
 
-    // Create subscription
     const sub = await db.subscriptions.create({
       studentId: uid,
       planType,
@@ -69,11 +73,8 @@ router.get("/students/:uid/subscriptions", async (req, res) => {
     const { uid } = req.params;
 
     const student = await db.students.findByPk(uid);
-    if (!student) {
-      return res.status(404).json({ error: "Student not found" });
-    }
+    if (!student) return res.status(404).json({ error: "Student not found" });
 
-    // Sync pending subscriptions before returning
     await syncPendingForStudent(student);
 
     const subs = await db.subscriptions.findAll({
@@ -88,31 +89,76 @@ router.get("/students/:uid/subscriptions", async (req, res) => {
 });
 
 /* ---------------------------------------------------------
-   UPDATE SUBSCRIPTION STATUS
+   UPDATE SUBSCRIPTION STATUS (ACTIVATED, CANCELLED, FAILED)
    POST /subscriptions/update-status
-   Called by PayPal webhook handler
 --------------------------------------------------------- */
 router.post("/subscriptions/update-status", async (req, res) => {
   try {
     const { paypalSubscriptionId, status, nextBillingDate } = req.body;
 
     if (!paypalSubscriptionId || !status) {
-      return res
-        .status(400)
-        .json({ error: "Missing subscriptionId or status" });
+      return res.status(400).json({ error: "Missing subscriptionId or status" });
     }
 
     const sub = await db.subscriptions.findOne({
       where: { paypalSubscriptionId }
     });
 
-    if (!sub) {
-      return res.status(404).json({ error: "Subscription not found" });
-    }
+    if (!sub) return res.status(404).json({ error: "Subscription not found" });
+
+    const student = await db.students.findByPk(sub.studentId);
+    if (!student) return res.status(404).json({ error: "Student not found" });
 
     sub.status = status;
     if (nextBillingDate) sub.nextBillingDate = nextBillingDate;
     await sub.save();
+
+    const firstName = student.name.split(" ")[0];
+    const brand = "Bean's Dreams";
+    const logoUrl = "https://yourcdn.com/logo.png";
+    const websiteUrl = "https://beansdreams.org";
+    const dashboardUrl = "https://portal.beansdreams.org/dashboard";
+
+    // Send correct email based on status
+    if (status === "active") {
+      const html = subscriptionActivatedEmail({
+        brand,
+        firstName,
+        subscriptionName: sub.planType,
+        dashboardUrl,
+        supportEmail: "support@beansdreams.org",
+        logoUrl,
+        websiteUrl
+      });
+      await sendEmail(student.email, "Your subscription is active", html);
+    }
+
+    if (status === "cancelled") {
+      const html = subscriptionCancelledEmail({
+        brand,
+        firstName,
+        subscriptionName: sub.planType,
+        endDate: nextBillingDate || "your next billing cycle",
+        supportEmail: "support@beansdreams.org",
+        logoUrl,
+        websiteUrl
+      });
+      await sendEmail(student.email, "Your subscription has been cancelled", html);
+    }
+
+    if (status === "past_due") {
+      const html = subscriptionPaymentFailedEmail({
+        brand,
+        firstName,
+        subscriptionName: sub.planType,
+        retryDate: nextBillingDate || "soon",
+        supportEmail: "support@beansdreams.org",
+        dashboardUrl,
+        logoUrl,
+        websiteUrl
+      });
+      await sendEmail(student.email, "Payment failed for your subscription", html);
+    }
 
     res.json({ success: true, subscription: sub });
   } catch (err) {
@@ -122,9 +168,8 @@ router.post("/subscriptions/update-status", async (req, res) => {
 });
 
 /* ---------------------------------------------------------
-   APPLY RENEWAL CREDITS
+   APPLY RENEWAL CREDITS + SEND RENEWAL EMAIL
    POST /subscriptions/apply-renewal
-   Called when PayPal sends PAYMENT.SALE.COMPLETED
 --------------------------------------------------------- */
 router.post("/subscriptions/apply-renewal", async (req, res) => {
   try {
@@ -138,16 +183,11 @@ router.post("/subscriptions/apply-renewal", async (req, res) => {
       where: { paypalSubscriptionId }
     });
 
-    if (!sub) {
-      return res.status(404).json({ error: "Subscription not found" });
-    }
+    if (!sub) return res.status(404).json({ error: "Subscription not found" });
 
     const student = await db.students.findByPk(sub.studentId);
-    if (!student) {
-      return res.status(404).json({ error: "Student not found" });
-    }
+    if (!student) return res.status(404).json({ error: "Student not found" });
 
-    // Apply credits for renewal
     const credits = sub.creditsPerCycle || 0;
     const typeBreakdown = sub.creditType || {};
 
@@ -158,13 +198,20 @@ router.post("/subscriptions/apply-renewal", async (req, res) => {
       });
     }
 
-    // Notify student
-    await sendPortalEmail("subscription_renewed", {
-      uid: sub.studentId,
-      email: student.email,
-      plan: sub.planType,
-      credits
+    const html = subscriptionRenewalEmail({
+      brand: "Bean's Dreams",
+      firstName: student.name.split(" ")[0],
+      subscriptionName: sub.planType,
+      renewalDate: new Date().toLocaleDateString(),
+      amount: credits,
+      currency: "credits",
+      dashboardUrl: "https://portal.beansdreams.org/dashboard",
+      supportEmail: "support@beansdreams.org",
+      logoUrl: "https://yourcdn.com/logo.png",
+      websiteUrl: "https://beansdreams.org"
     });
+
+    await sendEmail(student.email, "Your subscription has renewed", html);
 
     res.json({ success: true, creditsApplied: credits });
   } catch (err) {
@@ -174,3 +221,4 @@ router.post("/subscriptions/apply-renewal", async (req, res) => {
 });
 
 module.exports = router;
+
