@@ -2,6 +2,7 @@
 const { Sequelize, DataTypes } = require("sequelize");
 const dotenv = require("dotenv");
 dotenv.config();
+const ClassCompletion = require("./model/ClassCompletion")(sequelize, DataTypes);
 
 const sequelize = new Sequelize(process.env.DATABASE_URL, {
   dialect: "postgres",
@@ -139,6 +140,10 @@ const PendingDownload = sequelize.define(
   },
   { freezeTableName: true }
 );
+
+Student.hasMany(ClassCompletion, { foreignKey: "uid", sourceKey: "id" });
+ClassCompletion.belongsTo(Student, { foreignKey: "uid", targetKey: "id" });
+
 
 /* ---------------------------
    SUBSCRIPTIONS
