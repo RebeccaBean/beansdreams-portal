@@ -73,7 +73,7 @@ const adminAuthRoutes = require("./routes/adminAuth");
 const filesRoutes = require("./routes/files");
 const calendlyRoutes = require("./routes/calendly");
 const subscriptionsRoutes = require("./routes/subscriptions");
-const creditHistoryRoutes = require("./routes/creditHistory");
+const creditHistory = require('./utils/creditHistory');
 
 const referralRoutes = require("./routes/referrals");
 const referralAnalyticsRoutes = require("./routes/referralAnalytics");
