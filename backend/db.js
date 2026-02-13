@@ -3,47 +3,10 @@ const { Sequelize, DataTypes } = require("sequelize");
 const dotenv = require("dotenv");
 dotenv.config();
 
-/* ---------------------------
-   Initialize Sequelize for Render
---------------------------- */
 const sequelize = new Sequelize(process.env.DATABASE_URL, {
   dialect: "postgres",
-  logging: false,
-  dialectOptions: {
-    ssl: {
-      require: true,
-      rejectUnauthorized: false
-    }
-  }
+  logging: false
 });
-
-/* ---------------------------
-   Load Models (Factory Pattern)
---------------------------- */
-const BadgeProgress = require("./model/BadgeProgress")(sequelize, DataTypes);
-const ClassCompletion = require("./model/ClassCompletion")(sequelize, DataTypes);
-const Upload = require("./model/Upload")(sequelize, DataTypes);
-const User = require("./model/Students")(sequelize, DataTypes);
-const JournalEntry = require("./model/JournalEntry")(sequelize, DataTypes);
-const ReflectionEntry = require("./model/ReflectionEntry")(sequelize, DataTypes);
-const Streak = require("./model/Streak")(sequelize, DataTypes);
-const CoachingSession = require("./model/CoachingSession")(sequelize, DataTypes);
-const Referral = require("./model/Referral")(sequelize, DataTypes);
-const Notification = require("./model/Notification")(sequelize, DataTypes);
-
-module.exports = {
-  sequelize,
-  BadgeProgress,
-  ClassCompletion,
-  Upload,
-  User,
-  JournalEntry,
-  ReflectionEntry,
-  Streak,
-  CoachingSession,
-  Referral,
-  Notification
-};
 
 /* ---------------------------
    STUDENT MODEL
