@@ -73,7 +73,7 @@ const adminAuthRoutes = require("./routes/adminAuth");
 const filesRoutes = require("./routes/files");
 const calendlyRoutes = require("./routes/calendly");
 const subscriptionsRoutes = require("./routes/subscriptions");
-const creditHistory = require('./utils/creditHistory');
+const creditHistoryRoutes = require("./routes/creditHistory");
 
 const referralRoutes = require("./routes/referrals");
 const referralAnalyticsRoutes = require("./routes/referralAnalytics");
@@ -88,7 +88,7 @@ app.use("/system", require("./routes/system"));
 app.use("/auth", authRoutes);
 
 // PayPal webhooks (no auth)
-app.use("/webhooks", paypalWebhooks);
+app.use("/webhooks", paypalRoutes);
 
 // Calendly webhooks (no auth)
 app.use("/api", calendlyRoutes);
