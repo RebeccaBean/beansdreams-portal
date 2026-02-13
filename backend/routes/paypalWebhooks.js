@@ -1,3 +1,7 @@
+const express = require("express");
+const router = express.Router();
+
+// Your existing code
 router.post("/paypal", async (req, res) => {
   try {
     // 1. Verify signature
@@ -23,16 +27,12 @@ router.post("/paypal", async (req, res) => {
       });
     }
 
-    // Extract subscription ID
     const subscriptionId =
       resource?.id ||
       resource?.billing_agreement_id ||
       resource?.subscription_id ||
       null;
 
-    /* -------------------------------------------------------
-       PAYMENT.CAPTURE.COMPLETED → Create pending order
-    -------------------------------------------------------- */
     if (eventType === "PAYMENT.CAPTURE.COMPLETED") {
       const email =
         resource?.payer?.email_address ||
@@ -54,7 +54,6 @@ router.post("/paypal", async (req, res) => {
         createdAt: new Date().toISOString()
       });
 
-      // Notify portal
       await fetch(`${PORTAL_API_URL}/orders/complete`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -64,9 +63,6 @@ router.post("/paypal", async (req, res) => {
       return res.json({ success: true });
     }
 
-    /* -------------------------------------------------------
-       SUBSCRIPTION EVENTS
-    -------------------------------------------------------- */
     const forward = async (endpoint, payload) => {
       if (!PORTAL_API_URL) return;
       await fetch(`${PORTAL_API_URL}${endpoint}`, {
@@ -119,3 +115,6 @@ router.post("/paypal", async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 });
+
+// Export router so server.js can use it
+module.exports = router;
