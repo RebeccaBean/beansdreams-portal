@@ -2,45 +2,37 @@
 const { Sequelize, DataTypes } = require("sequelize");
 const dotenv = require("dotenv");
 dotenv.config();
-const ClassCompletion = require("./model/ClassCompletion")(sequelize, DataTypes);
 
+/* ---------------------------
+   1. Initialize Sequelize
+--------------------------- */
 const sequelize = new Sequelize(process.env.DATABASE_URL, {
   dialect: "postgres",
   logging: false
 });
 
 /* ---------------------------
-   STUDENT MODEL
+   2. Load Models from /model
 --------------------------- */
-const Student = sequelize.define(
-  "Student",
-  {
-    id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
-    name: { type: DataTypes.STRING },
-    email: { type: DataTypes.STRING, unique: true },
-    password: { type: DataTypes.STRING, allowNull: false },
-    role: {
-      type: DataTypes.ENUM("student", "admin", "teacher"),
-      defaultValue: "student",
-    },
+const Student = require("./model/Student")(sequelize, DataTypes);
+const ClassCompletion = require("./model/ClassCompletion")(sequelize, DataTypes);
 
-    credits: { type: DataTypes.INTEGER, defaultValue: 0 },
-    remainingCredits: {
-      type: DataTypes.JSONB,
-      defaultValue: { total: 0, byType: {} },
-    },
-    paymentHistory: { type: DataTypes.JSONB, defaultValue: [] },
-    subscriptions: { type: DataTypes.JSONB, defaultValue: [] },
-    downloads: { type: DataTypes.ARRAY(DataTypes.STRING), defaultValue: [] },
-
-    reset_token: { type: DataTypes.STRING },
-    reset_token_expiry: { type: DataTypes.DATE },
-  },
-  { freezeTableName: true }
-);
+const Upload = require("./model/Upload")(sequelize, DataTypes);
+const JournalEntry = require("./model/JournalEntry")(sequelize, DataTypes);
+const ReflectionEntry = require("./model/ReflectionEntry")(sequelize, DataTypes);
+const CoachingSession = require("./model/CoachingSession")(sequelize, DataTypes);
+const Streak = require("./model/Streak")(sequelize, DataTypes);
+const BadgeProgress = require("./model/BadgeProgress")(sequelize, DataTypes);
+const Referral = require("./model/Referral")(sequelize, DataTypes);
+const Notification = require("./model/Notification")(sequelize, DataTypes);
 
 /* ---------------------------
-   ORDER MODELS
+   3. STUDENT MODEL (already loaded)
+--------------------------- */
+// Student is loaded from ./model/Student
+
+/* ---------------------------
+   4. ORDER MODELS
 --------------------------- */
 const Order = sequelize.define(
   "Order",
@@ -85,7 +77,7 @@ const PendingOrder = sequelize.define(
 );
 
 /* ---------------------------
-   CREDIT MODELS
+   5. CREDIT MODELS
 --------------------------- */
 const CreditTransaction = sequelize.define(
   "CreditTransaction",
@@ -116,7 +108,7 @@ const PendingCredit = sequelize.define(
 );
 
 /* ---------------------------
-   DOWNLOAD MODELS
+   6. DOWNLOAD MODELS
 --------------------------- */
 const Download = sequelize.define(
   "Download",
@@ -141,12 +133,8 @@ const PendingDownload = sequelize.define(
   { freezeTableName: true }
 );
 
-Student.hasMany(ClassCompletion, { foreignKey: "uid", sourceKey: "id" });
-ClassCompletion.belongsTo(Student, { foreignKey: "uid", targetKey: "id" });
-
-
 /* ---------------------------
-   SUBSCRIPTIONS
+   7. SUBSCRIPTIONS
 --------------------------- */
 const Subscription = sequelize.define(
   "Subscription",
@@ -177,7 +165,7 @@ const PendingSubscription = sequelize.define(
 );
 
 /* ---------------------------
-   SINGLE CLASS PURCHASE
+   8. SINGLE CLASS PURCHASE
 --------------------------- */
 const SingleClassPurchase = sequelize.define(
   "SingleClassPurchase",
@@ -193,7 +181,7 @@ const SingleClassPurchase = sequelize.define(
 );
 
 /* ---------------------------
-   WEBHOOK LOGS
+   9. WEBHOOK LOGS
 --------------------------- */
 const PayPalWebhook = sequelize.define(
   "PayPalWebhook",
@@ -228,7 +216,7 @@ const CalendlyEvent = sequelize.define(
 );
 
 /* ---------------------------
-   ASSOCIATIONS
+   10. ASSOCIATIONS
 --------------------------- */
 
 // Student → Orders
@@ -260,9 +248,8 @@ Student.hasMany(CalendlyEvent, { foreignKey: "studentId" });
 CalendlyEvent.belongsTo(Student, { foreignKey: "studentId" });
 
 /* ---------------------------
-   BADGE SYSTEM ASSOCIATIONS
+   11. BADGE SYSTEM ASSOCIATIONS
 --------------------------- */
-
 Student.hasMany(ClassCompletion, { foreignKey: "uid", sourceKey: "id" });
 ClassCompletion.belongsTo(Student, { foreignKey: "uid", targetKey: "id" });
 
@@ -282,7 +269,7 @@ Student.hasOne(Streak, { foreignKey: "uid", sourceKey: "id" });
 Streak.belongsTo(Student, { foreignKey: "uid", targetKey: "id" });
 
 /* ---------------------------
-   INIT DB
+   12. INIT DB
 --------------------------- */
 async function initDB() {
   try {
@@ -299,12 +286,13 @@ async function initDB() {
 initDB();
 
 /* ---------------------------
-   EXPORTS
+   13. EXPORTS
 --------------------------- */
 module.exports = {
   sequelize,
+
+  // core models
   students: Student,
-  users: User,
   orders: Order,
   orderItems: OrderItem,
   creditTransactions: CreditTransaction,
@@ -319,6 +307,7 @@ module.exports = {
   pendingOrders: PendingOrder,
   pendingSubscriptions: PendingSubscription,
 
+  // badge / progress / engagement
   badgeProgress: BadgeProgress,
   classCompletions: ClassCompletion,
   uploads: Upload,
@@ -326,6 +315,8 @@ module.exports = {
   reflectionEntries: ReflectionEntry,
   streaks: Streak,
   coachingSessions: CoachingSession,
+
+  // referrals / notifications
   referrals: Referral,
   notifications: Notification,
 };
