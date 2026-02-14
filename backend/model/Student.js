@@ -1,6 +1,6 @@
-// backend/model/Students.js
+// backend/model/Student.js
 module.exports = (sequelize, DataTypes) => {
-  const User = sequelize.define("User", {
+  const Student = sequelize.define("Student", {
     id: {
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,
@@ -62,5 +62,5 @@ module.exports = (sequelize, DataTypes) => {
     }
   });
 
-  return User;
+  return Student;
 };
