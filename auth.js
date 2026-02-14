@@ -5,7 +5,8 @@ function showForm(id) {
 }
 
 // Base API URL
-const API = "https://beansdreams-portal.onrender.com/auth/signup";
+const API = "https://beansdreams-portal.onrender.com";
+
 
 // SIGN IN
 document.getElementById('signinForm').addEventListener('submit', async (e) => {
