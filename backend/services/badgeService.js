@@ -1,7 +1,10 @@
 // backend/services/badgeService.js
-const BadgeProgress = require("../model/BadgeProgress");
+const BadgeProgress = require("../models/BadgeProgress");
 const badgeDefinitions = require("../badges/badgeDefinitions");
 
+/**
+ * INTERNAL: Update badge progress
+ */
 exports.updateBadgeProgressInternal = async (uid, progressKey, increment = 1) => {
   let badgeDoc = await BadgeProgress.findOne({ where: { uid } });
 
@@ -40,4 +43,28 @@ exports.updateBadgeProgressInternal = async (uid, progressKey, increment = 1) =>
   });
 
   return badgeDoc;
+};
+
+/**
+ * PUBLIC: Get badge progress for a student
+ * (This is the function your controller expects)
+ */
+exports.getBadgeProgress = async (uid) => {
+  let badgeDoc = await BadgeProgress.findOne({ where: { uid } });
+
+  if (!badgeDoc) {
+    // Create empty progress if none exists
+    badgeDoc = await BadgeProgress.create({
+      uid,
+      progress: {},
+      earnedBadges: [],
+      unlockedCodes: []
+    });
+  }
+
+  return {
+    progress: badgeDoc.progress || {},
+    earnedBadges: badgeDoc.earnedBadges || [],
+    unlockedCodes: badgeDoc.unlockedCodes || []
+  };
 };

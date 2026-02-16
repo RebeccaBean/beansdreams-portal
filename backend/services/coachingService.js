@@ -1,5 +1,5 @@
 // backend/services/coachingService.js
-const CoachingSession = require("../model/CoachingSession");
+const CoachingSession = require("../models/CoachingSession");
 const { emit } = require("./badgeEventService");
 
 /**

@@ -1,5 +1,5 @@
 // backend/services/classService.js
-const ClassCompletion = require("../model/ClassCompletion");
+const ClassCompletion = require("../models/ClassCompletion");
 const { updateBadgeProgressInternal } = require("./badgeService");
 const { emit } = require("./badgeEventService");
 

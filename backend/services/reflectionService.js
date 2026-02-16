@@ -1,5 +1,5 @@
 // backend/services/reflectionService.js
-const ReflectionEntry = require("../model/ReflectionEntry");
+const ReflectionEntry = require("../models/ReflectionEntry");
 const { emit } = require("./badgeEventService");
 
 /**

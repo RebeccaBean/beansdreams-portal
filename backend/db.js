@@ -14,17 +14,17 @@ const sequelize = new Sequelize(process.env.DATABASE_URL, {
 /* ---------------------------
    2. Load Models from /model
 --------------------------- */
-const Student = require("./model/Student")(sequelize, DataTypes);
-const ClassCompletion = require("./model/ClassCompletion")(sequelize, DataTypes);
+const Student = require("./models/Student")(sequelize, DataTypes);
+const ClassCompletion = require("./models/ClassCompletion")(sequelize, DataTypes);
 
-const Upload = require("./model/Upload")(sequelize, DataTypes);
-const JournalEntry = require("./model/JournalEntry")(sequelize, DataTypes);
-const ReflectionEntry = require("./model/ReflectionEntry")(sequelize, DataTypes);
-const CoachingSession = require("./model/CoachingSession")(sequelize, DataTypes);
-const Streak = require("./model/Streak")(sequelize, DataTypes);
-const BadgeProgress = require("./model/BadgeProgress")(sequelize, DataTypes);
-const Referral = require("./model/Referral")(sequelize, DataTypes);
-const Notification = require("./model/Notification")(sequelize, DataTypes);
+const Upload = require("./models/Upload")(sequelize, DataTypes);
+const JournalEntry = require("./models/JournalEntry")(sequelize, DataTypes);
+const ReflectionEntry = require("./models/ReflectionEntry")(sequelize, DataTypes);
+const CoachingSession = require("./models/CoachingSession")(sequelize, DataTypes);
+const Streak = require("./models/Streak")(sequelize, DataTypes);
+const BadgeProgress = require("./models/BadgeProgress")(sequelize, DataTypes);
+const Referral = require("./models/Referral")(sequelize, DataTypes);
+const Notification = require("./models/Notification")(sequelize, DataTypes);
 
 /* ---------------------------
    3. STUDENT MODEL (already loaded)

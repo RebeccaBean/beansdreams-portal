@@ -1,5 +1,5 @@
 // backend/services/uploadService.js
-const Upload = require("../model/Upload");
+const Upload = require("../models/Upload");
 const { emit } = require("./badgeEventService");
 
 /**
