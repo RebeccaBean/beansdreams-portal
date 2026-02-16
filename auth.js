@@ -25,7 +25,7 @@ document.getElementById('signinForm').addEventListener('submit', async (e) => {
 
   if (res.ok) {
     localStorage.setItem("token", data.token);
-    window.location.href = "/dashboard/student.html";
+    window.location.href = "/dashboard.html";
   } else {
     document.getElementById("signinMessage").innerText = data.error || "Error signing in";
   }
