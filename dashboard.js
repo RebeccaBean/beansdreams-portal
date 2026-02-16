@@ -8,7 +8,7 @@ const API_BASE = "http://localhost:5000/api";
 function ensureAuth() {
   const token = localStorage.getItem("token");
   if (!token) {
-    window.location.href = "/auth.html";
+    window.location.href = "/index.html";
   }
   return token;
 }
