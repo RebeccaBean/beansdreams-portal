@@ -1,8 +1,8 @@
 /* ============================================================
    CONFIG + API WRAPPER
 ============================================================ */
-const AUTH_BASE = "http://localhost:5000";
-const API_BASE = "http://localhost:5000/api";
+const AUTH_BASE = "https://beansdreams-portal.onrender.com";
+const API_BASE = "https://beansdreams-portal.onrender.com/api";
 
 /* Ensure user is logged in */
 function ensureAuth() {
@@ -127,9 +127,8 @@ async function loadCurrentUser() {
     setText("studentEmail", user.email || "");
 
     // Referral link
-    const referralLink = `${window.location.origin}/auth.html?ref=${encodeURIComponent(
-      user.id
-    )}`;
+    const referralLink = `${window.location.origin}/index.html?ref=${user.id}`;
+
     const referralInput = document.getElementById("referralLink");
     if (referralInput) referralInput.value = referralLink;
 
