@@ -1,5 +1,5 @@
 // backend/services/badgeService.js
-const BadgeProgress = require("../models/BadgeProgress");
+const { BadgeProgress } = require("../db");
 const badgeDefinitions = require("../badges/badgeDefinitions");
 
 /**

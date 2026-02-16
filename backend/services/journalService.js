@@ -1,5 +1,5 @@
 // backend/services/journalService.js
-const JournalEntry = require("../models/JournalEntry");
+const JournalEntry = require("../model/JournalEntry");
 const { emit } = require("./badgeEventService");
 
 /**

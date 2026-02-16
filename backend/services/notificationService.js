@@ -1,5 +1,5 @@
 // backend/services/notificationService.js
-const { Notification } = require("../models");
+const { Notification } = require("../db");
 const nodemailer = require("nodemailer");
 const { emit } = require("./badgeEventService");
 

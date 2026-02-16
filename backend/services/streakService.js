@@ -1,5 +1,5 @@
 // backend/services/streakService.js
-const Streak = require("../models/Streak");
+const Streak = require("../model/Streak");
 const { emit } = require("./badgeEventService");
 
 /**
