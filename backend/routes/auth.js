@@ -5,22 +5,31 @@ const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const { Op } = require("sequelize");
 const db = require("../db");
-const { sendEmail } = require("../utils/mailer");
-const {
-  welcomeEmail,
-  resetPasswordEmail
-} = require("../utils/emailTemplates");
 
+// Email utilities (disabled for now)
+const { sendEmail } = require("../utils/mailer");
+const { welcomeEmail, resetPasswordEmail } = require("../utils/emailTemplates");
+
+// Sync pending data
 const { syncPendingForStudent } = require("../utils/syncPending");
+
+// Auth middleware
 const { requireAuth } = require("../middleware/auth");
 
 const router = express.Router();
 
 /**
+ * NORMALIZE EMAIL
+ */
+function normalizeEmail(email) {
+  return email.toLowerCase().trim();
+}
+
+/**
  * SIGN UP — All new users become "student"
  */
 router.post("/signup", async (req, res) => {
-  const { name, email, password } = req.body;
+  let { name, email, password } = req.body;
 
   try {
     if (!name || !email || !password) {
@@ -28,6 +37,8 @@ router.post("/signup", async (req, res) => {
         error: "Name, email, and password are required"
       });
     }
+
+    email = normalizeEmail(email);
 
     const existing = await db.students.findOne({ where: { email } });
     if (existing) {
@@ -47,19 +58,28 @@ router.post("/signup", async (req, res) => {
     // Sync pending data (credits, downloads, subs, orders)
     const synced = await syncPendingForStudent(student);
 
-    // Send welcome email
-    const html = welcomeEmail({
-      brand: "Student Portal",
-      firstName: student.name.split(" ")[0],
-      email: student.email,
-      role: student.role,
-      dashboardUrl: "https://yourdomain.com/dashboard",
-      supportEmail: "support@yourdomain.com",
-      logoUrl: "https://yourcdn.com/logo.png",
-      websiteUrl: "https://yourdomain.com"
-    });
+    /**
+     * EMAIL SENDING DISABLED FOR RENDER
+     * (Prevents ECONNREFUSED 127.0.0.1:587 crashes)
+     */
+    try {
+      const html = welcomeEmail({
+        brand: "Student Portal",
+        firstName: student.name.split(" ")[0],
+        email: student.email,
+        role: student.role,
+        dashboardUrl: "https://yourdomain.com/dashboard",
+        supportEmail: "support@yourdomain.com",
+        logoUrl: "https://yourcdn.com/logo.png",
+        websiteUrl: "https://yourdomain.com"
+      });
 
-    await sendEmail(student.email, "Welcome to Student Portal", html);
+      // DISABLED — uncomment when SMTP is configured
+      // await sendEmail(student.email, "Welcome to Student Portal", html);
+
+    } catch (emailErr) {
+      console.error("Email send failed (ignored):", emailErr);
+    }
 
     res.json({
       id: student.id,
@@ -78,26 +98,28 @@ router.post("/signup", async (req, res) => {
  * SIGN IN
  */
 router.post("/signin", async (req, res) => {
-  const { email, password } = req.body;
+  let { email, password } = req.body;
 
   try {
+    email = normalizeEmail(email);
+
     const student = await db.students.findOne({ where: { email } });
     if (!student) {
-      return res.status(400).json({ error: "User not found" });
+      return res.status(400).json({ error: "Invalid email or password" });
     }
 
     const match = await bcrypt.compare(password, student.password);
     if (!match) {
-      return res.status(400).json({ error: "Invalid credentials" });
+      return res.status(400).json({ error: "Invalid email or password" });
     }
 
     // Sync pending data on login
     const synced = await syncPendingForStudent(student);
 
     const token = jwt.sign(
-      { id: student.id, role: student.role },
+      { id: student.id, role: student.role, email: student.email },
       process.env.JWT_SECRET,
-      { expiresIn: "1h" }
+      { expiresIn: "7d" }
     );
 
     res.json({ token, syncedPending: synced });
@@ -112,9 +134,11 @@ router.post("/signin", async (req, res) => {
  * FORGOT PASSWORD — Sends reset email
  */
 router.post("/forgot-password", async (req, res) => {
-  const { email } = req.body;
+  let { email } = req.body;
 
   try {
+    email = normalizeEmail(email);
+
     const student = await db.students.findOne({ where: { email } });
     if (!student) {
       return res.status(400).json({ error: "User not found" });
@@ -138,7 +162,8 @@ router.post("/forgot-password", async (req, res) => {
       websiteUrl: "https://yourdomain.com"
     });
 
-    await sendEmail(email, "Reset your Student Portal password", html);
+    // DISABLED — uncomment when SMTP is configured
+    // await sendEmail(email, "Reset your Student Portal password", html);
 
     res.json({ message: "Password reset email sent" });
 
@@ -181,7 +206,9 @@ router.post("/reset-password", async (req, res) => {
   }
 });
 
-// GET /api/auth/me
+/**
+ * GET /auth/me
+ */
 router.get("/me", requireAuth, async (req, res) => {
   res.json({
     id: req.user.id,
@@ -190,6 +217,5 @@ router.get("/me", requireAuth, async (req, res) => {
     role: req.user.role
   });
 });
-
 
 module.exports = router;
