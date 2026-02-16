@@ -139,7 +139,7 @@ async function loadCurrentUser() {
   } catch (err) {
     console.error(err);
     localStorage.removeItem("token");
-    window.location.href = "/auth.html";
+    window.location.href = "/index.html";
   }
 }
 
