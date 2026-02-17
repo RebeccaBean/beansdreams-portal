@@ -3,7 +3,7 @@
 const uploadService = require("../services/uploadService");
 const { updateBadgeProgressInternal } = require("./badgesController");
 
-exports.upload = async (req, res) => {
+exports.createUpload = async (req, res) => {
   try {
     const uid = req.user?.uid;
     if (!uid) {
