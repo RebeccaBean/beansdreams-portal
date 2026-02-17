@@ -3,10 +3,17 @@
 const referralService = require("../services/referralService");
 const { updateBadgeProgressInternal } = require("./badgesController");
 
+// ===============================
+// POST /referrals/create
+// ===============================
 exports.createReferral = async (req, res) => {
   try {
     const referrerUid = req.user?.uid || null;
     const { email, referralCode } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ error: "Missing required field: email" });
+    }
 
     // Track share (for badges)
     if (referrerUid) {
@@ -26,11 +33,18 @@ exports.createReferral = async (req, res) => {
   }
 };
 
+// ===============================
+// POST /referrals/signed-up
+// ===============================
 exports.markSignedUp = async (req, res) => {
   try {
     const { email } = req.body;
-    const referral = await referralService.markSignedUp(email);
 
+    if (!email) {
+      return res.status(400).json({ error: "Missing required field: email" });
+    }
+
+    const referral = await referralService.markSignedUp(email);
     res.json({ success: true, referral });
   } catch (err) {
     console.error("Referral signup error:", err);
@@ -38,11 +52,18 @@ exports.markSignedUp = async (req, res) => {
   }
 };
 
+// ===============================
+// POST /referrals/completed
+// ===============================
 exports.markCompleted = async (req, res) => {
   try {
     const { email } = req.body;
-    const referral = await referralService.markCompleted(email);
 
+    if (!email) {
+      return res.status(400).json({ error: "Missing required field: email" });
+    }
+
+    const referral = await referralService.markCompleted(email);
     res.json({ success: true, referral });
   } catch (err) {
     console.error("Referral completion error:", err);

@@ -1,68 +1,55 @@
-const axios = require("axios");
+// backend/controllers/uploadsController.js
 
-exports.uploadFile = async (req, res) => {
+const uploadService = require("../services/uploadService");
+const { updateBadgeProgressInternal } = require("./badgesController");
+
+exports.upload = async (req, res) => {
   try {
-    const uid = req.user.uid; // however you get the logged-in user
+    const uid = req.user?.uid;
+    if (!uid) {
+      return res.status(401).json({ error: "Unauthorized: Missing user UID" });
+    }
 
-    // 1. Handle the actual upload
     const file = req.file;
     if (!file) {
       return res.status(400).json({ error: "No file uploaded" });
     }
 
-    // Save file metadata to DB if needed...
-
-    // 2. Determine which badge progress key this upload affects
-    let progressKey = null;
-
-    if (file.mimetype.startsWith("audio/") || file.originalname.includes("vocal")) {
+    // Determine badge progress key
+    let progressKey;
+    if (file.mimetype?.startsWith("audio/") || file.originalname?.includes("vocal")) {
       progressKey = "vocal_recordings";
-    } else if (file.originalname.includes("creative")) {
+    } else if (file.originalname?.includes("creative")) {
       progressKey = "creative_submissions";
     } else {
       progressKey = "performance_uploads";
     }
 
-    // 3. Call the badge update route
-    await axios.post(
-      `${process.env.PORTAL_API}/students/${uid}/badges/update`,
-      { progressKey, increment: 1 },
-      { headers: { Authorization: req.headers.authorization } }
-    );
+    // Update badge progress
+    await updateBadgeProgressInternal(uid, progressKey, 1);
 
-    res.json({ success: true, file });
-  } catch (err) {
-    console.error("Upload error:", err);
-    res.status(500).json({ error: "Upload failed" });
-  }
-};
+    // Save upload metadata
+    const upload = await uploadService.createUpload(uid, progressKey, {
+      filename: file.filename,
+      originalname: file.originalname,
+      mimetype: file.mimetype,
+      size: file.size
+    });
 
-async function uploadPerformance(uid, fileData) {
-  await PerformanceUpload.create({ uid, fileData });
-
-  await emit(uid, "performance_uploaded");
-
-  return { success: true };
-}
-// backend/controllers/uploadsController.js
-const uploadService = require("../services/uploadService");
-
-exports.createUpload = async (req, res) => {
-  try {
-    const uid = req.user.uid;
-    const { type, fileMeta } = req.body;
-
-    const upload = await uploadService.createUpload(uid, type, fileMeta);
     res.json({ success: true, upload });
   } catch (err) {
-    console.error("Upload error:", err);
+    console.error("Unified upload error:", err);
     res.status(500).json({ error: "Upload failed" });
   }
 };
 
 exports.getUploads = async (req, res) => {
   try {
-    const uid = req.user.uid;
+    const uid = req.user?.uid;
+    if (!uid) {
+      return res.status(401).json({ error: "Unauthorized: Missing user UID" });
+    }
+
     const uploads = await uploadService.getUploads(uid);
     res.json({ uploads });
   } catch (err) {

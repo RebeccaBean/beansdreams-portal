@@ -114,6 +114,9 @@ exports.updateBadgeProgress = async (req, res) => {
   }
 };
 
+// ===============================
+// INTERNAL UPDATE (used by services)
+// ===============================
 exports.updateBadgeProgressInternal = async (uid, progressKey, increment = 1) => {
   let badgeDoc = await BadgeProgress.findOne({ where: { uid } });
 

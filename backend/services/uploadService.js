@@ -1,54 +1,76 @@
 // backend/services/uploadService.js
+
 const Upload = require("../model/Upload");
 const { emit } = require("./badgeEventService");
 
-/**
- * Create an upload and trigger badge events
- * type examples:
- *  - "performance"
- *  - "vocal_recording"
- *  - "creative_submission"
- */
+// ===============================
+// Create an upload and trigger badge events
+// ===============================
 async function createUpload(uid, type, fileMeta = {}) {
-  if (!uid) throw new Error("UID is required");
-  if (!type) throw new Error("Upload type is required");
+  try {
+    if (!uid) {
+      throw new Error("UID is required");
+    }
 
-  const normalizedType = type.toLowerCase();
+    if (!type) {
+      throw new Error("Upload type is required");
+    }
 
-  // 1. Save upload record
-  const upload = await Upload.create({
-    uid,
-    type: normalizedType,
-    meta: fileMeta,
-    uploadedAt: new Date()
-  });
+    const normalizedType = String(type).trim().toLowerCase();
+    const safeMeta = typeof fileMeta === "object" && fileMeta !== null ? fileMeta : {};
 
-  // 2. Emit badge events based on type
-  if (normalizedType === "performance") {
-    await emit(uid, "performance_uploaded");
+    // Save upload record
+    const upload = await Upload.create({
+      uid,
+      type: normalizedType,
+      meta: safeMeta,
+      uploadedAt: new Date()
+    });
+
+    // Emit badge events based on type
+    try {
+      if (normalizedType === "performance") {
+        await emit(uid, "performance_uploaded");
+      }
+
+      if (normalizedType === "vocal_recording") {
+        await emit(uid, "vocal_recording_uploaded");
+      }
+
+      if (normalizedType === "creative_submission") {
+        await emit(uid, "creative_submission");
+      }
+    } catch (eventErr) {
+      console.error("Upload badge event error:", eventErr);
+      // Do not throw — upload should still succeed
+    }
+
+    return upload;
+  } catch (err) {
+    console.error("createUpload error:", err);
+    throw err;
   }
-
-  if (normalizedType === "vocal_recording") {
-    await emit(uid, "vocal_recording_uploaded");
-  }
-
-  if (normalizedType === "creative_submission") {
-    await emit(uid, "creative_submission");
-  }
-
-  return upload;
 }
 
-/**
- * Get uploads for a user
- */
+// ===============================
+// Get uploads for a user
+// ===============================
 async function getUploads(uid, filter = {}) {
-  if (!uid) throw new Error("UID is required");
+  try {
+    if (!uid) {
+      throw new Error("UID is required");
+    }
 
-  return Upload.findAll({
-    where: { uid, ...filter },
-    order: [["uploadedAt", "DESC"]]
-  });
+    const safeFilter = typeof filter === "object" && filter !== null ? filter : {};
+
+    return await Upload.findAll({
+      where: { uid, ...safeFilter },
+      order: [["uploadedAt", "DESC"]]
+    });
+  } catch (err) {
+    console.error("getUploads error:", err);
+    throw err;
+  }
 }
 
 module.exports = {

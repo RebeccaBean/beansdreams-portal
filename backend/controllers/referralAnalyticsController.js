@@ -3,6 +3,9 @@
 const { referrals: Referral } = require("../db");
 const { Op } = require("sequelize");
 
+// ===============================
+// GET /referrals/overview
+// ===============================
 exports.getOverviewStats = async (req, res) => {
   try {
     const [total, pending, signedUp, completed] = await Promise.all([
@@ -27,9 +30,16 @@ exports.getOverviewStats = async (req, res) => {
   }
 };
 
+// ===============================
+// GET /referrals/referrer/:uid
+// ===============================
 exports.getReferrerStats = async (req, res) => {
   try {
     const referrerUid = req.params.uid;
+
+    if (!referrerUid) {
+      return res.status(400).json({ error: "Missing referrer UID" });
+    }
 
     const [total, signedUp, completed] = await Promise.all([
       Referral.count({ where: { referrerUid } }),
@@ -49,6 +59,9 @@ exports.getReferrerStats = async (req, res) => {
   }
 };
 
+// ===============================
+// GET /referrals/timeline?from=&to=
+// ===============================
 exports.getReferralsOverTime = async (req, res) => {
   try {
     const { from, to } = req.query;

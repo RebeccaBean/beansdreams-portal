@@ -1,5 +1,6 @@
 // backend/services/notificationService.js
-const { Notification } = require("../db");
+
+const { notifications } = require("../db");
 const nodemailer = require("nodemailer");
 const { emit } = require("./badgeEventService");
 
@@ -12,60 +13,108 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-/**
- * Create a notification (in-app + optional email + optional badge event)
- */
+// ===============================
+// Create a notification
+// ===============================
 async function createNotification(uid, message, options = {}) {
-  const { email = false, badgeEvent = null, payload = {} } = options;
+  try {
+    if (!uid) {
+      throw new Error("UID is required");
+    }
 
-  // Save in-app notification
-  const notification = await Notification.create({
-    uid,
-    message,
-    read: false,
-    createdAt: new Date()
-  });
+    if (!message) {
+      throw new Error("Notification message is required");
+    }
 
-  // Send email if requested
-  if (email && process.env.EMAIL_USER) {
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: options.to || process.env.ADMIN_EMAIL,
-      subject: "New Notification",
-      text: message
+    const { email = false, badgeEvent = null, payload = {}, to = null } = options;
+
+    // Save in-app notification
+    const notification = await notifications.create({
+      uid,
+      message,
+      read: false,
+      createdAt: new Date()
     });
-  }
 
-  // Trigger badge event if provided
-  if (badgeEvent) {
-    await emit(uid, badgeEvent, payload);
-  }
+    // Send email if requested
+    if (email && process.env.EMAIL_USER) {
+      try {
+        await transporter.sendMail({
+          from: process.env.EMAIL_USER,
+          to: to || process.env.ADMIN_EMAIL,
+          subject: "New Notification",
+          text: message
+        });
+      } catch (emailErr) {
+        console.error("Email send error:", emailErr);
+        // Do NOT throw — email failure shouldn't break notifications
+      }
+    }
 
-  return notification;
+    // Trigger badge event if provided
+    if (badgeEvent) {
+      try {
+        await emit(uid, badgeEvent, payload);
+      } catch (eventErr) {
+        console.error("Badge event error:", eventErr);
+      }
+    }
+
+    return notification;
+  } catch (err) {
+    console.error("createNotification error:", err);
+    throw err;
+  }
 }
 
-/**
- * Get notifications for a user
- */
+// ===============================
+// Get notifications for a user
+// ===============================
 async function getNotifications(uid) {
-  return Notification.findAll({
-    where: { uid },
-    order: [["createdAt", "DESC"]]
-  });
+  try {
+    if (!uid) {
+      throw new Error("UID is required");
+    }
+
+    return await notifications.findAll({
+      where: { uid },
+      order: [["createdAt", "DESC"]]
+    });
+  } catch (err) {
+    console.error("getNotifications error:", err);
+    throw err;
+  }
 }
 
-/**
- * Mark a notification as read
- */
+// ===============================
+// Mark a notification as read
+// ===============================
 async function markAsRead(uid, id) {
-  const notification = await Notification.findOne({
-    where: { id, uid }
-  });
+  try {
+    if (!uid) {
+      throw new Error("UID is required");
+    }
 
-  if (!notification) return;
+    if (!id) {
+      throw new Error("Notification ID is required");
+    }
 
-  notification.read = true;
-  await notification.save();
+    const notification = await notifications.findOne({
+      where: { id, uid }
+    });
+
+    if (!notification) {
+      return null;
+    }
+
+    notification.read = true;
+    await notification.save();
+
+    return notification;
+  } catch (err) {
+    console.error("markAsRead error:", err);
+    throw err;
+  }
 }
 
 module.exports = {
