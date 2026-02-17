@@ -7,10 +7,7 @@ const notificationService = require("../services/notificationService");
 // ===============================
 exports.getNotifications = async (req, res) => {
   try {
-    const uid = req.user?.uid;
-    if (!uid) {
-      return res.status(401).json({ error: "Unauthorized: Missing user UID" });
-    }
+    const uid = req.user.id;   // FIXED
 
     const notifications = await notificationService.getNotifications(uid);
     res.json({ notifications });
@@ -25,15 +22,8 @@ exports.getNotifications = async (req, res) => {
 // ===============================
 exports.markAsRead = async (req, res) => {
   try {
-    const uid = req.user?.uid;
-    if (!uid) {
-      return res.status(401).json({ error: "Unauthorized: Missing user UID" });
-    }
-
+    const uid = req.user.id;   // FIXED
     const { id } = req.params;
-    if (!id) {
-      return res.status(400).json({ error: "Missing notification ID" });
-    }
 
     await notificationService.markAsRead(uid, id);
     res.json({ success: true });
