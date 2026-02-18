@@ -168,36 +168,38 @@
 
       <!-- Column 3 -->
       <section class="column">
+<div class="session-links">
 
-        <!-- Sessions -->
-        <div class="card" id="section-sessions">
-          <h2>🎥 Lessons & Sessions</h2>
+  <div class="session-option">
+    <span class="session-label">Calendly link</span>
+    <div class="session-row">
+      <input type="url" id="calendlyLink" placeholder="https://calendly.com/nickrebbean-epkm">
+      <button class="open-session-btn" data-target="calendlyLink">Open</button>
+    </div>
+  </div>
 
-          <div class="session-links">
-            <div class="session-option">
-              <span class="session-label">Calendly link</span>
-              <input type="url" id="calendlyLink" placeholder="https://calendly.com/your-link">
-            </div>
+  <div class="session-option">
+    <span class="session-label">Google Meet link</span>
+    <div class="session-row">
+      <input type="url" id="googleMeetLink" placeholder="https://meet.google.com/...">
+      <button class="open-session-btn" data-target="googleMeetLink">Open</button>
+    </div>
+  </div>
 
-            <div class="session-option">
-              <span class="session-label">Google Meet link</span>
-              <input type="url" id="googleMeetLink" placeholder="https://meet.google.com/...">
-            </div>
+  <div class="session-option">
+    <span class="session-label">Zoom link</span>
+    <div class="session-row">
+      <input type="url" id="zoomLink" placeholder="https://zoom.us/j/7944049413">
+      <button class="open-session-btn" data-target="zoomLink">Open</button>
+    </div>
+  </div>
+<div class="next-session">
+  <p class="label">Next scheduled session:</p>
+  <p id="nextSessionInfo">Loading...</p>
+  <a id="joinSessionBtn" href="#" target="_blank" class="btn btn-secondary hidden">Join Session</a>
+</div>
 
-            <div class="session-option">
-              <span class="session-label">Zoom link</span>
-              <input type="url" id="zoomLink" placeholder="https://zoom.us/j/...">
-            </div>
-          </div>
-
-          <button id="saveSessionLinksBtn" class="btn">Save Session Links</button>
-
-          <div class="next-session">
-            <p class="label">Next scheduled session:</p>
-            <p id="nextSessionInfo">Loading...</p>
-            <a id="joinSessionBtn" href="#" target="_blank" class="btn btn-secondary hidden">Join Session</a>
-          </div>
-        </div>
+</div>
 
         <!-- Instructor Notes -->
         <div class="card" id="section-instructor-notes">

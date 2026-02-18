@@ -643,3 +643,22 @@ document.addEventListener("DOMContentLoaded", () => {
   setupLogout();
   setupBuyCredits();
 });
+document.querySelectorAll(".open-session-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const inputId = btn.dataset.target;
+    const url = document.getElementById(inputId)?.value;
+
+    if (!url) {
+      alert("No link saved yet.");
+      return;
+    }
+
+    // Basic validation
+    if (!url.startsWith("http")) {
+      alert("Invalid link");
+      return;
+    }
+
+    window.open(url, "_blank");
+  });
+});
