@@ -1,4 +1,4 @@
-const API = "https://beansdreams-portal.onrender.com";
+const API = "https://beansdreams-backend.onrender.com";
 let token = localStorage.getItem("adminToken");
 
 // Elements
