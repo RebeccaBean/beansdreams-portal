@@ -1,4 +1,4 @@
-const API = "https://portal.beansdreams/api/admin";
+const API = "https://portal.beansdreams.org/api/admin";
 let token = localStorage.getItem("adminToken");
 
 // Elements
